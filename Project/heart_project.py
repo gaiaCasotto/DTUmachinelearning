@@ -177,13 +177,15 @@ fig.savefig('outliers_boxplot.png')
 
 # %% Normal disttribution? 
 # Create histograms for each attribute
-for column in X_cont.columns:
-    plt.subplot(2, 3, i)
-    sns.histplot(df[column], kde=True)
-    plt.title(f'Histogram for {column}')
-    i += 1
+j = 1
+for i in range(0, X_cont.shape[1]):
+    column = X_cont[:, i]
+    plt.subplot(2, 3, j)
+    sns.histplot(column, kde=True)
+    plt.title(f'Histogram for Column {i}')
+    j += 1
 
 plt.tight_layout()
+plt.savefig('histograms.png')
 plt.show()
-
 # %%
