@@ -4,7 +4,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from scipy.linalg import svd
 import seaborn as sns
-import PIL
+from scipy import stats
 
 
 # Load the Heart Disease csv data using the Pandas library
@@ -176,16 +176,29 @@ fig.savefig('outliers_boxplot.png')
 
 
 # %% Normal disttribution? 
-# Create histograms for each attribute
+# Create histograms for each attribute and do normality test
 j = 1
+normality_results = []
 for i in range(0, X_cont.shape[1]):
     column = X_cont[:, i]
     plt.subplot(2, 3, j)
     sns.histplot(column, kde=True)
     plt.title(f'Histogram for {attributeNames_cont[i]}')
     j += 1
+    # Perform Shapiro-Wilk test on the current column
+    statistic, p_value = stats.shapiro(column)
+    normality_results.append((i, p_value))
 
+# Display histograms
 plt.tight_layout()
 plt.savefig('histograms.png')
 plt.show()
+
+# Display the results of normality test
+for column, p_value in normality_results:
+    alpha = 0.05  # Significance level
+    if p_value > alpha:
+        print(f"{column}: p-value={p_value:.4f} (The data appears to be normally distributed)")
+    else:
+        print(f"{column}: p-value={p_value:.4f} (The data does not appear to be normally distributed)")
 # %%
