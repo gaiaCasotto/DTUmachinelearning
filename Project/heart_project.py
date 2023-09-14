@@ -4,6 +4,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from scipy.linalg import svd
 import seaborn as sns
+import PIL
 
 
 # Load the Heart Disease csv data using the Pandas library
@@ -166,7 +167,23 @@ X_cont = np.delete(X, not_cont_att, axis=1)
 X_cont = X_cont.astype(float) #For some reason they are not seen as numbers
 attributeNames_cont = np.delete(attributeNames, not_cont_att)
 
-plt.figure(figsize=(12, 6))
-sns.boxplot(data=not_cont_att)  # Replace 'df' with your DataFrame
+fig = plt.figure()
+boxplot = sns.boxplot(data=X_cont)  # Replace 'df' with your DataFrame
 plt.title("Box Plot for Outliers")
+boxplot.set_xticklabels(attributeNames_cont)
 plt.show()
+fig.savefig('outliers_boxplot.png')
+
+
+# %% Normal disttribution? 
+# Create histograms for each attribute
+for column in X_cont.columns:
+    plt.subplot(2, 3, i)
+    sns.histplot(df[column], kde=True)
+    plt.title(f'Histogram for {column}')
+    i += 1
+
+plt.tight_layout()
+plt.show()
+
+# %%
