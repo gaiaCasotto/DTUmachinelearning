@@ -3,12 +3,13 @@ import numpy as np
 import heart_project as data
 
 #get data from data preprocessing file
-X = data.get_data_matrix() #matrix of continous values
+X, y, attributeNames = data.get_data_matrix() #matrix of continous values
+print(X)
 X_cont = data.get_cont_matrix(X)
 
 print("SUMMARY STATISTICS:")
 for i in range(0, len(X_cont[1,:])):  #first row, all columns
-    col = X_cont[:, 1]
+    col = X_cont[:, i]
     mean_col   = col.mean()
     std_col    = col.std(ddof=1)
     median_col = np.median(col)
