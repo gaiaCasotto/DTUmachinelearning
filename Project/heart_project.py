@@ -54,7 +54,7 @@ def get_data_matrix():  #returns X, y, attributeNames
     
 def get_cont_matrix(matrix):  #returns a matrix
     not_cont_att = [1, 2, 5, 6, 8, 10]
-    X_cont = np.delete(X, not_cont_att, axis=1)
+    X_cont = np.delete(matrix, not_cont_att, axis=1)
     X_cont = X_cont.astype(float) #For some reason they are not seen as numbers
     return X_cont
 
@@ -127,6 +127,27 @@ def pca_analysis(X, y, attributeNames):  #returns nothing
     plt.legend(['No heart disease', 'Heart disease'])
     plt.xlabel('PC1')
     plt.ylabel('PC2')
+    
+    # Now in 3D
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    plt.title('Projection on first 3 PCs')
+
+    # Plot PCA of the data in 3D
+    for c in [0, 1]:
+        # Select indices belonging to class c:
+        class_mask = (y == c)
+        ax.scatter(Z[class_mask, 0], Z[class_mask, 1], Z[class_mask, 2], marker='o')
+
+    # Add labels and legend
+    ax.set_xlabel('PC1')
+    ax.set_ylabel('PC2')
+    ax.set_zlabel('PC3')
+    ax.legend(['No heart disease', 'Heart disease'])
+
+    # Adjust the viewing angle (elevation and azimuth angles)
+    ax.view_init(elev=30, azim=100)
+    plt.show()
 
     # %%
     # Determine the number of rows and columns for the subplots
