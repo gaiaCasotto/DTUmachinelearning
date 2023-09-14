@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from scipy.linalg import svd
+import seaborn as sns
 
 
 # Load the Heart Disease csv data using the Pandas library
@@ -20,9 +21,15 @@ for i in range(len(df['RestingBP'])):
 sex_Labels = df['Sex'] 
 sex_Names = np.unique(sex_Labels)
 sex_Dict = dict(zip(sex_Names,range(len(sex_Labels))))
-
 sex_column = np.array([sex_Dict[sex] for sex in sex_Labels])
 df['Sex'] = sex_column
+
+# For ExerciseAngina, No = 0, Yes = 1
+EA_Labels = df['ExerciseAngina'] 
+EA_Names = np.unique(EA_Labels)
+EA_Dict = dict(zip(EA_Names,range(len(EA_Labels))))
+EA_column = np.array([EA_Dict[EA] for EA in EA_Labels])
+df['ExerciseAngina'] = EA_column
 
 X = df.drop(columns=['HeartDisease']).values
 y = df['HeartDisease'].values
@@ -55,13 +62,13 @@ N, M = X.shape
 # %% PCA SECTION --> AMount of variation explained as a function of 
 # the number of PCA components included
 
-# Get continuous variables (including the ones that are 0 or 1):
-not_cont_att = [2, 6, 8, 10]
-X_cont = np.delete(X, not_cont_att, axis=1)
-X_cont = X_cont.astype(float) #For some reason they are not seen as numbers
-attributeNames_cont = np.delete(attributeNames, not_cont_att)
+# Get variables for PCA (continuous and including the ones that are 0 or 1):
+not_pca_att = [2, 6, 10]
+X_pca = np.delete(X, not_pca_att, axis=1)
+X_pca = X_pca.astype(float) #For some reason they are not seen as numbers
+attributeNames_cont = np.delete(attributeNames, not_pca_att)
 # Subtract mean value from data
-Xc = X_cont - np.ones((N,1))*X_cont.mean(axis=0) #mean along columns (attributes)
+Xc = X_pca - np.ones((N,1))*X_pca.mean(axis=0) #mean along columns (attributes)
 # Different scale, standarise with std
 Xc = Xc*(1/np.std(Xc,0))
 
@@ -87,7 +94,7 @@ plt.grid()
 plt.show()
 
 # %% PCA SECTION --> Principal directions of considered PCA components
-N,M = X_cont.shape
+N,M = X_pca.shape
 num_pcs = 4
 pcs = np.arange(0,num_pcs) 
 legendStrs = ['PC'+str(e+1) for e in pcs]
@@ -151,4 +158,15 @@ plt.tight_layout()  # Ensures subplots are neatly arranged
 plt.show()
 
 
-# %%
+# %% Outliers
+# Create box plots to identify outliers for each attribute
+# continuous variables
+not_cont_att = [1, 2, 5, 6, 8, 10]
+X_cont = np.delete(X, not_cont_att, axis=1)
+X_cont = X_cont.astype(float) #For some reason they are not seen as numbers
+attributeNames_cont = np.delete(attributeNames, not_cont_att)
+
+plt.figure(figsize=(12, 6))
+sns.boxplot(data=not_cont_att)  # Replace 'df' with your DataFrame
+plt.title("Box Plot for Outliers")
+plt.show()
