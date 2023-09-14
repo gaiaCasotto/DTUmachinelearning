@@ -182,7 +182,7 @@ for i in range(0, X_cont.shape[1]):
     column = X_cont[:, i]
     plt.subplot(2, 3, j)
     sns.histplot(column, kde=True)
-    plt.title(f'Histogram for Column {i}')
+    plt.title(f'Histogram for {attributeNames_cont[i]}')
     j += 1
 
 plt.tight_layout()
