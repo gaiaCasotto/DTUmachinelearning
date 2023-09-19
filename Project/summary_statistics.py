@@ -18,5 +18,7 @@ for i in range(0, len(X_cont[1,:])):  #first row, all columns
 
 data.pca_analysis(X, y, attributeNames)
 
-#matrix with corelation coefficients of columns
+#matrix with correlation coefficients of columns
 correlation_matrix = np.corrcoef(X_cont, rowvar=False)
+
+print(correlation_matrix)
