@@ -16,5 +16,7 @@ for i in range(0, len(X_cont[1,:])):  #first row, all columns
     
     print(f"column {i}: mean = {mean_col}, std = {std_col}, median = {median_col}, range = {range_col}")
 
+data.pca_analysis(X, y, attributeNames)
+
 #matrix with corelation coefficients of columns
 correlation_matrix = np.corrcoef(X_cont, rowvar=False)

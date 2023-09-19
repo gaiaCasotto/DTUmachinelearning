@@ -33,8 +33,9 @@ def get_data_matrix():  #returns X, y, attributeNames
     EA_column = np.array([EA_Dict[EA] for EA in EA_Labels])
     df['ExerciseAngina'] = EA_column
 
-    X = df.drop(columns=['HeartDisease']).values
+    X = df.drop(columns=['HeartDisease']).values #maybe we should invert these lines?
     y = df['HeartDisease'].values
+    #print(f"printing y {y}")
 
     # Replace 0 values in column 4 (chol) with NaN
     X[X[:, 4] == 0, 4] = np.nan
