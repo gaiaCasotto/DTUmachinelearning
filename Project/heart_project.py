@@ -9,8 +9,8 @@ from scipy import stats
 
 # Load the Heart Disease csv data using the Pandas library
 def get_data_matrix():  #returns X, y, attributeNames
-    filename = '../heart.csv'
-    #filename = 'C:\\Users\\clara\\Desktop\\ML_Exercises\\Project_1\\Data\\heart.csv'
+    #filename = '../heart.csv'
+    filename = 'C:\\Users\\clara\\Desktop\\ML_Exercises\\Project_1\\Data\\heart.csv'
     df = pd.read_csv(filename)
 
     #eliminating the 0s in restingBP  //there is only ONE 0, so we delete it
@@ -53,11 +53,12 @@ def get_data_matrix():  #returns X, y, attributeNames
     attributeNames = df.columns[:-1].values
     return X, y, attributeNames
     
-def get_cont_matrix(matrix):  #returns a matrix
+def get_cont_matrix(matrix, attributeNames):  #returns a matrix
     not_cont_att = [1, 2, 5, 6, 8, 10]
     X_cont = np.delete(matrix, not_cont_att, axis=1)
     X_cont = X_cont.astype(float) #For some reason they are not seen as numbers
-    return X_cont
+    attributeNames_cont = np.delete(attributeNames, not_pca_att)
+    return X_cont, attributeNames_cont
 
 
 def pca_analysis(X, y, attributeNames):  #returns nothing
@@ -225,4 +226,45 @@ def pca_analysis(X, y, attributeNames):  #returns nothing
             print(f"{column}: p-value={p_value:.4f} (The data appears to be normally distributed)")
         else:
             print(f"{column}: p-value={p_value:.4f} (The data does not appear to be normally distributed)")
-    # %%
+
+def data_analysis(X_cont, y, attributeNames_cont):
+    """
+    X_cont has to be a matrix with continuous atributes, 
+    not even binary
+    This shows the boxplot standarized
+    This shows graphs to see if the distribution is normal
+    """
+    ## Outliers
+    fig = plt.figure()
+    boxplot = sns.boxplot(data=X_cont)  # Replace 'df' with your DataFrame
+    plt.title("Box Plot for Outliers")
+    boxplot.set_xticklabels(attributeNames_cont)
+    plt.show()
+    fig.savefig('outliers_boxplot.png')
+    
+     # %% Normal disttribution?
+    # Create histograms for each attribute and do normality test
+    j = 1
+    normality_results = []
+    for i in range(0, X_cont.shape[1]):
+        column = X_cont[:, i]
+        plt.subplot(2, 3, j)
+        sns.histplot(column, kde=True)
+        plt.title(f'Histogram for {attributeNames_cont[i]}')
+        j += 1
+        # Perform Shapiro-Wilk test on the current column
+        statistic, p_value = stats.shapiro(column)
+        normality_results.append((i, p_value))
+
+    # Display histograms
+    plt.tight_layout()
+    plt.savefig('histograms.png')
+    plt.show()
+
+    # Display the results of normality test
+    for column, p_value in normality_results:
+        alpha = 0.05  # Significance level
+        if p_value > alpha:
+            print(f"{column}: p-value={p_value:.4f} (The data appears to be normally distributed)")
+        else:
+            print(f"{column}: p-value={p_value:.4f} (The data does not appear to be normally distributed)")
