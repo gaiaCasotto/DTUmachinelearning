@@ -3,6 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import heart_project as data
+from scipy.stats import chi2_contingency
 
 
 #---DEFINE FUNCTION----> get categorical matrix
@@ -62,7 +63,7 @@ correlation_matrix = df_cont.corr()
 plt.figure(figsize=(7, 10))
 sns.heatmap(correlation_matrix, annot=True, cmap="coolwarm", fmt=".2f", linewidths=0.5)
 plt.title('Correlation Heatmap of Continuous Attributes with HeartDisease')
-plt.savefig('CorrelationHeatmap.png')
+plt.savefig('images/CorrelationHeatmap.png')
 #plt.show()
 
     
@@ -95,19 +96,25 @@ for ind1 in range(a_len):
     L = plt.legend()
     L.get_texts()[0].set_text('has CVD')
     L.get_texts()[1].set_text('no CVD')
-    plt.savefig('countPlot_' + cat_attributes[ind1] + '.png')
+    plt.savefig('images/countPlot_' + cat_attributes[ind1] + '.png')
     #plt.show()
 
 
-#correlation matrix for continuous attributes
+#-----correlation matrix for categorical attributes----
+cat_attributes.append('HeartDisease')
+chi2_stats = pd.DataFrame(index=cat_attributes, columns=cat_attributes)
 
-'''
-# Calculate the correlation matrix
-correlation_matrix = df_cat.corr()
+# Calculate chi-squared statistics for each pair of categorical attributes
+for attribute1 in cat_attributes:
+    for attribute2 in cat_attributes:
+        if attribute1 != attribute2:
+            contingency_table = pd.crosstab(df_cat[attribute1], df_cat[attribute2])
+            chi2, _, _, _ = chi2_contingency(contingency_table)
+            chi2_stats.at[attribute1, attribute2] = chi2
 
-# Create a heatmap of the correlations
-plt.figure(figsize=(7, 7))
-sns.heatmap(correlation_matrix, annot=True, cmap="coolwarm", fmt=".2f", linewidths=0.5)
-plt.title('Correlation Heatmap of Categorical Attributes with HeartDisease')
-plt.show()
-'''
+# Create a heatmap of chi-squared statistics
+plt.figure(figsize=(10, 8))
+sns.heatmap(chi2_stats.astype(float), annot=True, cmap="coolwarm", fmt=".2f", linewidths=0.5)
+plt.title('Chi-Squared Correlation Heatmap of Categorical Attributes')
+#plt.show()
+plt.savefig('images/CorrelationHeatmapCategorical.png')
