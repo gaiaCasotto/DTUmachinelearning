@@ -57,7 +57,7 @@ def get_cont_matrix(matrix, attributeNames):  #returns a matrix
     not_cont_att = [1, 2, 5, 6, 8, 10]
     X_cont = np.delete(matrix, not_cont_att, axis=1)
     X_cont = X_cont.astype(float) #For some reason they are not seen as numbers
-    attributeNames_cont = np.delete(attributeNames, not_pca_att)
+    attributeNames_cont = np.delete(attributeNames, not_cont_att)
     return X_cont, attributeNames_cont
 
 
