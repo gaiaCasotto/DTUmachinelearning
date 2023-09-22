@@ -62,7 +62,7 @@ correlation_matrix = df_cont.corr()
 plt.figure(figsize=(7, 10))
 sns.heatmap(correlation_matrix, annot=True, cmap="coolwarm", fmt=".2f", linewidths=0.5)
 plt.title('Correlation Heatmap of Continuous Attributes with HeartDisease')
-plt.savefig('Correlation Heatmap.png')
+plt.savefig('CorrelationHeatmap.png')
 #plt.show()
 
     
