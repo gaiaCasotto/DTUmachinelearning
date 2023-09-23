@@ -12,7 +12,7 @@ def get_data_matrix():  #returns X, y, attributeNames
     #filename = '../heart.csv'
     filename = 'C:\\Users\\clara\\Desktop\\ML_Exercises\\Project_1\\Data\\heart.csv'
     df = pd.read_csv(filename)
-
+    print(round(df['Cholesterol'].corr(df['HeartDisease']),3))
     #eliminating the 0s in restingBP  //there is only ONE 0, so we delete it
     for i in range(len(df['RestingBP'])):
         if df['RestingBP'].values[i] == 0:
