@@ -9,8 +9,8 @@ from scipy import stats
 
 # Load the Heart Disease csv data using the Pandas library
 def get_data_matrix():  #returns X, y, attributeNames
-    #filename = '../heart.csv'
-    filename = 'C:\\Users\\clara\\Desktop\\ML_Exercises\\Project_1\\Data\\heart.csv'
+    filename = '../heart.csv'
+    #filename = 'C:\\Users\\clara\\Desktop\\ML_Exercises\\Project_1\\Data\\heart.csv'
     df = pd.read_csv(filename)
     print(round(df['Cholesterol'].corr(df['HeartDisease']),3))
     #eliminating the 0s in restingBP  //there is only ONE 0, so we delete it
@@ -33,21 +33,37 @@ def get_data_matrix():  #returns X, y, attributeNames
     EA_column = np.array([EA_Dict[EA] for EA in EA_Labels])
     df['ExerciseAngina'] = EA_column
 
+    df_with_cvd = df[df['HeartDisease'] == 1]
+    df_healthy  = df[df['HeartDisease'] == 0]
+    X_with_cvd  = df_with_cvd.drop(columns=['HeartDisease']).values
+    X_healthy   = df_healthy.drop(columns=['HeartDisease']).values
+    print(X_healthy)
+    print()
+    print(X_with_cvd)
+
     X = df.drop(columns=['HeartDisease']).values #maybe we should invert these lines?
     y = df['HeartDisease'].values
     #print(f"printing y {y}")
 
     # Replace 0 values in column 4 (chol) with NaN
     X[X[:, 4] == 0, 4] = np.nan
-
+    X_with_cvd[X_with_cvd[:, 4] == 0, 4] = np.nan
+    X_healthy[X_healthy[:, 4] == 0, 4] = np.nan
+    
     # Convert the column with NaN values to float
     X[:, 4] = X[:, 4].astype(float)
-
+    X_with_cvd[:, 4] = X_with_cvd[:, 4].astype(float)
+    X_healthy[:, 4] = X_healthy[:, 4].astype(float)
     # Impute NaN values with the median of the column
-    impute_val = np.nanmedian(X[:, 4])
+    healthy_val = np.nanmean(X_healthy[:, 4])
+    cvd_val     = np.nanmean(X_with_cvd[:, 4])
+    print(f"cvd: = {cvd_val}, healthy = {healthy_val}")
     for i in range(0, len(X[:, 4])):
         if np.isnan(X[i,4]):
-            X[i,4] = impute_val
+            if y[i] == 1: #if the patient had cvd, then cvd_val
+                X[i,4] = cvd_val
+            else:
+                X[i,4] = healthy_val
 
     # We can extract the attribute names that came from the header of the csv
     attributeNames = df.columns[:-1].values
