@@ -4,7 +4,7 @@ import heart_project as data
 
 #get data from data preprocessing file
 X, y, attributeNames = data.get_data_matrix() #matrix of continous values
-X_cont = data.get_cont_matrix(X)
+X_cont, cont_attributes= data.get_cont_matrix(X, attributeNames)
 
 print("SUMMARY STATISTICS:")
 for i in range(0, len(X_cont[1,:])):  #first row, all columns
