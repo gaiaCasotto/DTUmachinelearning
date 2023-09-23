@@ -15,17 +15,17 @@ def get_cat_matrix(X):
 
 
 X, y, attribute_names = data.get_data_matrix()
-X_cont = data.get_cont_matrix(X) #matrix of continuous values
+X_cont, cont_attributes = data.get_cont_matrix(X, attribute_names) #matrix of continuous values
 
 print(y)
 print(len(attribute_names))
 not_cont_att = [1, 2, 5, 6, 8, 10]
 
 #---SCATTER PLOTS FOR CONTINUOUS ATTRUBUTES----
-cont_attributes = attribute_names
+'''cont_attributes = attribute_names
 for index in sorted(not_cont_att, reverse=True):
     cont_attributes = np.delete(cont_attributes, index)
-
+'''
 a_len = len(cont_attributes)
 print(a_len)
 print(cont_attributes)

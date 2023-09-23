@@ -9,6 +9,9 @@ from matplotlib.pyplot import figure, subplot, plot, legend, show,  xlabel, ylab
 [X, y, attributeNames] = data.get_data_matrix() #matrix of continous values
 #[X_cont, attributeNames_cont] = data.get_cont_matrix(X, attributeNames)
 
+# STslope is column 9, we convert it to positive
+X[:,9] = np.abs(X[:,9])
+
 not_cont_att = [1, 2, 5, 6, 8, 10]
 X_cont = np.delete(X, not_cont_att, axis=1)
 X_cont = X_cont.astype(float) #For some reason they are not seen as numbers
@@ -62,3 +65,8 @@ column_names = np.concatenate((attributeNames_new, ["Heart_Disease"]))
 row_names = np.concatenate((attributeNames_new, ["Heart_Disease"]))
 
 df_corr= pd.DataFrame(correlation_matrix, columns=column_names, index=row_names)
+
+
+
+# TODO: Now that i have changed STLope do the PCA again
+# encode the categorical values and find the correlation
