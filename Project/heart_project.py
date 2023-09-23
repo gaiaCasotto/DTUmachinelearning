@@ -12,6 +12,7 @@ def get_data_matrix():  #returns X, y, attributeNames
     filename = '../heart.csv'
     #filename = 'C:\\Users\\clara\\Desktop\\ML_Exercises\\Project_1\\Data\\heart.csv'
     df = pd.read_csv(filename)
+    print(df.describe().T)
     print(round(df['Cholesterol'].corr(df['HeartDisease']),3))
     #eliminating the 0s in restingBP  //there is only ONE 0, so we delete it
     for i in range(len(df['RestingBP'])):
@@ -73,8 +74,10 @@ def get_cont_matrix(matrix, attributeNames):  #returns a matrix
     not_cont_att = [1, 2, 5, 6, 8, 10]
     X_cont = np.delete(matrix, not_cont_att, axis=1)
     X_cont = X_cont.astype(float) #For some reason they are not seen as numbers
-    attributeNames_cont = np.delete(attributeNames, not_cont_att)
-    return X_cont, attributeNames_cont
+    cont_attributes = attributeNames
+    for index in sorted(not_cont_att, reverse=True):
+        cont_attributes = np.delete(cont_attributes, index)
+    return X_cont, cont_attributes
 
 
 def pca_analysis(X, y, attributeNames):  #returns nothing
