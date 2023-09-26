@@ -10,6 +10,7 @@ from scipy import stats
 # Load the Heart Disease csv data using the Pandas library
 def get_data_matrix():  #returns X, y, attributeNames
     filename = '../heart.csv'
+    filename = '/home/codespace/DTUmachinelearning/heart.csv'
     #filename = 'C:\\Users\\clara\\Desktop\\ML_Exercises\\Project_1\\Data\\heart.csv'
     df = pd.read_csv(filename)
     print(df.describe().T)
