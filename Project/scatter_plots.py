@@ -19,6 +19,8 @@ def get_cat_matrix(X):
 X, y, attribute_names = data.get_data_matrix()
 X_cont, cont_attributes = data.get_cont_matrix(X, attribute_names) #matrix of continuous values
 
+data.pca_analysis(X, y, attribute_names)
+
 print(y)
 print(len(attribute_names))
 not_cont_att = [1, 2, 5, 6, 8, 10]
@@ -122,3 +124,4 @@ sns.heatmap(chi2_stats.astype(float), annot=True, cmap="coolwarm", fmt=".2f", li
 plt.title('Chi-Squared Correlation Heatmap of Categorical Attributes')
 #plt.show()
 plt.savefig('images/CorrelationHeatmapCategorical.png')
+

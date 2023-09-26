@@ -10,7 +10,7 @@ from scipy import stats
 # Load the Heart Disease csv data using the Pandas library
 def get_data_matrix():  #returns X, y, attributeNames
     filename = '../heart.csv'
-    filename = '/home/codespace/DTUmachinelearning/heart.csv'
+    #filename = '/home/codespace/DTUmachinelearning/heart.csv'
     #filename = 'C:\\Users\\clara\\Desktop\\ML_Exercises\\Project_1\\Data\\heart.csv'
     df = pd.read_csv(filename)
     print(df.describe().T)
@@ -209,7 +209,7 @@ def pca_analysis(X, y, attributeNames):  #returns nothing
     # continuous variables
 
     not_cont_att = [1, 2, 5, 6, 8, 10]
-    X_cont = get_cont_matrix(X)
+    X_cont = get_cont_matrix(X, attributeNames)
     attributeNames_cont = np.delete(attributeNames, not_cont_att)
 
     fig = plt.figure()
