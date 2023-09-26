@@ -71,9 +71,10 @@ def get_data_matrix():  #returns X, y, attributeNames
     attributeNames = df.columns[:-1].values
     return X, y, attributeNames
     
-def get_cont_matrix(matrix, attributeNames):  #returns a matrix
+def get_cont_matrix(matrix, attributeNames):  #returns a matrix and cont_attributes array
     not_cont_att = [1, 2, 5, 6, 8, 10]
     X_cont = np.delete(matrix, not_cont_att, axis=1)
+    print(X_cont)
     X_cont = X_cont.astype(float) #For some reason they are not seen as numbers
     cont_attributes = attributeNames
     for index in sorted(not_cont_att, reverse=True):
@@ -82,7 +83,6 @@ def get_cont_matrix(matrix, attributeNames):  #returns a matrix
 
 
 def pca_analysis(X, y, attributeNames):  #returns nothing
-#X, y, attributeNames = get_data_matrix()
     N, M = X.shape
     # %% PCA SECTION --> AMount of variation explained as a function of
     # the number of PCA components included
@@ -209,9 +209,9 @@ def pca_analysis(X, y, attributeNames):  #returns nothing
     # continuous variables
 
     not_cont_att = [1, 2, 5, 6, 8, 10]
-    X_cont = get_cont_matrix(X, attributeNames)
-    attributeNames_cont = np.delete(attributeNames, not_cont_att)
-
+    X_cont, attributeNames_cont = get_cont_matrix(X, attributeNames)
+    # attributeNames_cont = np.delete(attributeNames, not_cont_att)
+    print(X_cont)
     fig = plt.figure()
     boxplot = sns.boxplot(data=X_cont)  # Replace 'df' with your DataFrame
     plt.title("Box Plot for Outliers")
