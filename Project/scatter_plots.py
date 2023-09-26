@@ -19,6 +19,7 @@ def get_cat_matrix(X):
 X, y, attribute_names = data.get_data_matrix()
 X_cont, cont_attributes = data.get_cont_matrix(X, attribute_names) #matrix of continuous values
 
+data.data_analysis(X_cont, y, cont_attributes)
 data.pca_analysis(X, y, attribute_names)
 
 print(y)
