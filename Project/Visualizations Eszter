@@ -1,0 +1,104 @@
+## Visualizations for heart project data
+import heart_project as data
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from scipy import stats
+from matplotlib.pyplot import (figure, imshow, xticks, yticks, xlabel, ylabel, title, 
+                               colorbar, cm, show, subplot, ylim, axes)
+from scipy.stats import zscore
+
+X, y, attributeNames = data.get_data_matrix()
+X_cont, cont_attributes = data.get_cont_matrix(X,attributeNames)
+
+#Boxplot for normalized data
+N, M = X_cont.shape
+Xc = X_cont - np.ones((N,1))*X_cont.mean(axis=0) #mean along columns (attributes)
+# Different scale, standarise with std
+Xc = Xc*(1/np.std(Xc,0))
+
+not_cont_att = [1, 2, 5, 6, 8, 10]
+attributeNames_cont = np.delete(attributeNames, not_cont_att)
+
+sns.set_palette("tab10")
+
+
+fig = plt.figure(figsize=(10, 6))
+boxplot = sns.boxplot(data=Xc)  
+plt.title("Box Plot on normalized continuous Heart Disease Data", size=20, y = 1.05)
+boxplot.set_xticklabels(attributeNames_cont)
+plt.xlabel("Attributes",size=15, labelpad=15)
+plt.ylabel("Values (normalized)", size=15, labelpad=15)
+plt.show()
+plt.savefig('images/normalized_boxplot.png')
+
+
+#Correlation matrix
+correlation_matrix = np.corrcoef(X_cont, rowvar=False)
+
+# Set color palette
+sns.set(style="white")  
+cmap = sns.diverging_palette(250, 8, as_cmap=True) 
+
+# Create a correlation heatmap
+p=plt.figure(figsize=(10, 8))  # Adjust figure size
+hmap = sns.heatmap(correlation_matrix, annot=True, cmap=cmap, square=True)
+hmap.xaxis.tick_top() # x axis on top
+hmap.xaxis.set_label_position('top')
+hmap.tick_params(length=0)
+plt.title("Correlation Heatmap of Attributes in Heart Disease Data", size=20, y = 1.15)
+hmap.set_xticklabels(attributeNames_cont, rotation=45)  # Customize x-axis labels
+hmap.set_yticklabels(attributeNames_cont, rotation=0, va="center")  
+plt.show()
+
+# Faceted boxplots according to heart disease yes or no
+
+C=2
+classNames= 'Healthy', 'Heart Disease'
+figure(figsize=(14,7))
+for c in range(C):
+    subplot(1,C,c+1)
+    class_mask = (y==c) 
+    plt.boxplot(Xc[class_mask,:])
+    title('Class: '+classNames[c])
+    xticks(range(1,len(attributeNames_cont)+1), [a[:4] for a in attributeNames_cont], rotation=45)
+    y_up = Xc.max()+(Xc.max()-Xc.min())*0.1; y_down = Xc.min()-(Xc.max()-Xc.min())*0.1
+    ylim(y_down, y_up)
+
+plt.savefig('images/Faceted_boxplots.png')
+
+
+#Data matrix visualization tileplot
+
+X_standarized = zscore(X_cont, ddof=1)
+
+#Sorted data matrix plot
+sorted_indices = np.argsort(y)
+X_sorted = X_standarized[sorted_indices, :]
+
+# Create the ordered plot
+fig, ax = plt.subplots(figsize=(12, 8))
+im = ax.imshow(X_sorted, interpolation='none', aspect=(6/N), cmap=cm.coolwarm)
+xticks(range(5), attributeNames_cont, fontsize=14)
+xlabel('Attributes', fontsize=16, labelpad=15)
+ylabel('Data objects', fontsize=16, labelpad=15)
+title('Heart Disease Data Matrix', fontsize=20, y=1.05)
+
+# Add thicker vertical lines between classes with labels
+class_labels_mapping = {0: "Healthy", 1: "Heart Disease"}  # Add labels for each class value
+unique_classes = np.unique(y)
+for i in range(0, len(unique_classes)):
+    row_index = np.where(sorted_indices == np.where(y == unique_classes[i])[0][0])[0][0]
+    ax.text(4.6, row_index+250, class_labels_mapping[unique_classes[i]], fontsize=12, va='center')  # Add class label
+for i in range(1,len(unique_classes)):
+    ax.axhline(row_index, color='black', linewidth=3)  # Increase line thickness
+
+# Adjust the position of the colorbar to the left
+cbar_ax = fig.add_axes([0.85, 0.15, 0.02, 0.7])  # [left, bottom, width, height]
+cbar = plt.colorbar(im, cax=cbar_ax)
+
+plt.show()
+plt.savefig('images/Sorted_Data_matrix_plot.png')
+
+
+
