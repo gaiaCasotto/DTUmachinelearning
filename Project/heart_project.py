@@ -217,7 +217,7 @@ def pca_analysis(X, y, attributeNames):  #returns nothing
     plt.title("Box Plot for Outliers")
     boxplot.set_xticklabels(attributeNames_cont)
     plt.show()
-    fig.savefig('outliers_boxplot.png')
+    fig.savefig('images/outliers_boxplot.png')
 
 
     # %% Normal disttribution?
@@ -236,7 +236,7 @@ def pca_analysis(X, y, attributeNames):  #returns nothing
 
     # Display histograms
     plt.tight_layout()
-    plt.savefig('histograms.png')
+    plt.savefig('images/histograms.png')
     plt.show()
 
     # Display the results of normality test
@@ -260,7 +260,7 @@ def data_analysis(X_cont, y, attributeNames_cont):
     plt.title("Box Plot for Outliers")
     boxplot.set_xticklabels(attributeNames_cont)
     plt.show()
-    fig.savefig('outliers_boxplot.png')
+    fig.savefig('images/outliers_boxplot.png')
     
      # %% Normal disttribution?
     # Create histograms for each attribute and do normality test
@@ -278,7 +278,7 @@ def data_analysis(X_cont, y, attributeNames_cont):
 
     # Display histograms
     plt.tight_layout()
-    plt.savefig('histograms.png')
+    plt.savefig('images/histograms.png')
     plt.show()
 
     # Display the results of normality test
