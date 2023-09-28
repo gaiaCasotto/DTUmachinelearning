@@ -2,6 +2,7 @@
 import heart_project as data
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib import cm
 import seaborn as sns
 from scipy import stats
 from matplotlib.pyplot import (figure, imshow, xticks, yticks, xlabel, ylabel, title, 
