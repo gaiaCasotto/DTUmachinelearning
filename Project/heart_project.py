@@ -22,10 +22,6 @@ def get_data_matrix():  #returns X, y, attributeNames
         if df['RestingBP'].values[i] == 0:
             df = df.drop(i)
             break; #There is only one
-        
-    # Converting oldpeak negative values to positive    
-    # Oldpeak is column 9, we convert it to positive
-    X[:,9] = np.abs(X[:,9])
     
     # For sex, Female = 0, Male = 1
     sex_Labels = df['Sex']

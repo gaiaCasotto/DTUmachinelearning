@@ -13,13 +13,25 @@ def get_cat_matrix(X):
     #not_cont_att = [1, 2, 5, 6, 8, 10]
     cont_att = [0,3,4,7,9]
     X_cat = np.delete(X, cont_att, axis = 1)
-    return X_cat    
+    return X_cat
 
 X, y, attribute_names = data.get_data_matrix()
 X_cont, cont_attributes = data.get_cont_matrix(X, attribute_names) #matrix of continuous values
 
 data.data_analysis(X_cont, y, cont_attributes)
 data.pca_analysis(X, y, attribute_names)
+
+#correlation matrix for all attributes!!
+df1 = pd.DataFrame(X, columns = attribute_names)
+df1['HeartDisease'] = y
+
+# Calculate the correlation matrix
+plt.figure(figsize = (20,10))
+sns.heatmap(df1.corr(), xticklabels=df1.columns.values, yticklabels=df1.columns.values, cmap="coolwarm", fmt=".2f", linewidths=0.5,annot = True)
+plt.xticks(rotation=45, ha='right')
+plt.title('Corr_matrix_all_attributes.png')
+#plt.show()
+plt.savefig('images/CorrelationHeatmapAllAttributes.png')
 
 print(y)
 print(len(attribute_names))
@@ -56,6 +68,8 @@ for i in range(X_cont.shape[1]):
     plt.show()
     '''
  
+ 
+
 #---correlation matrix for continuous attributes----
 df_cont = pd.DataFrame(X_cont, columns=cont_attributes)
 df_cont['HeartDisease'] = y
