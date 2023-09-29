@@ -13,8 +13,7 @@ def get_cat_matrix(X):
     #not_cont_att = [1, 2, 5, 6, 8, 10]
     cont_att = [0,3,4,7,9]
     X_cat = np.delete(X, cont_att, axis = 1)
-    return X_cat
-
+    return X_cat    
 
 X, y, attribute_names = data.get_data_matrix()
 X_cont, cont_attributes = data.get_cont_matrix(X, attribute_names) #matrix of continuous values
