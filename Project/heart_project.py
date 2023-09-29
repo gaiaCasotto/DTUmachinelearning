@@ -16,12 +16,17 @@ def get_data_matrix():  #returns X, y, attributeNames
     df = pd.read_csv(filename)
     print(df.describe().T)
     print(round(df['Cholesterol'].corr(df['HeartDisease']),3))
+    
     #eliminating the 0s in restingBP  //there is only ONE 0, so we delete it
     for i in range(len(df['RestingBP'])):
         if df['RestingBP'].values[i] == 0:
             df = df.drop(i)
             break; #There is only one
         
+    # Converting oldpeak negative values to positive    
+    # Oldpeak is column 9, we convert it to positive
+    X[:,9] = np.abs(X[:,9])
+    
     # For sex, Female = 0, Male = 1
     sex_Labels = df['Sex']
     sex_Names = np.unique(sex_Labels)
@@ -143,7 +148,7 @@ def pca_analysis(X, y, attributeNames):  #returns nothing
     r = np.arange(1,M+1)
     for i in pcs:
         plt.bar(r+i*bw, V[:,i], width=bw)
-    plt.xticks(r+bw, attributeNames_cont)
+    plt.xticks(r+bw, attributeNames_cont, rotation=45)
     plt.xlabel('Attributes')
     plt.ylabel('Component coefficients')
     plt.legend(legendStrs)
