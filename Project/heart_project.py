@@ -134,7 +134,7 @@ def pca_analysis(X, y, attributeNames):  #returns nothing
     r = np.arange(1,M+1)
     for i in pcs:
         plt.bar(r+i*bw, V[:,i], width=bw)
-    plt.xticks(r+bw, attributeNames_cont)
+    plt.xticks(r+bw, attributeNames_cont, rotation=45)
     plt.xlabel('Attributes')
     plt.ylabel('Component coefficients')
     plt.legend(legendStrs)
