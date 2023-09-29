@@ -29,7 +29,6 @@ df1['HeartDisease'] = y
 plt.figure(figsize = (20,10))
 sns.heatmap(df1.corr(), xticklabels=df1.columns.values, yticklabels=df1.columns.values, cmap="coolwarm", fmt=".2f", linewidths=0.5,annot = True)
 plt.xticks(rotation=45, ha='right')
-plt.title('Corr_matrix_all_attributes.png')
 #plt.show()
 plt.savefig('images/CorrelationHeatmapAllAttributes.png')
 
