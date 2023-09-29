@@ -104,20 +104,30 @@ df_cat['HeartDisease'] = y
 # EX Angina: 0 is No, 1 is Yes
 
 # Create a clustered bar plot
+print(f" cat valuessss : {df_cat.columns.values}")
 plt.figure(figsize=(10, 6))
-for ind1 in range(a_len):
-    sns.countplot(data=df_cat, x=cat_attributes[ind1], hue='HeartDisease', palette='Set1')
+for att in cat_attributes:
+    sns.countplot(data=df_cat, x=att, hue='HeartDisease', palette='Set1')
     plt.title('Clustered Bar Plot of Categorical Attributes')
-    x_label = cat_attributes[ind1]
-    plt.xlabel(cat_attributes[ind1])
+    x_label = att
+    plt.xlabel(att)
     plt.ylabel('Count')
     plt.legend(title='', loc='upper right')
     L = plt.legend()
-    L.get_texts()[0].set_text('has CVD')
-    L.get_texts()[1].set_text('no CVD')
-    plt.savefig('images/countPlot_' + cat_attributes[ind1] + '.png')
+    plt.legend(['No Heart Disease','Heart Disease'])
+    plt.savefig('images/countPlot_' + att + '.png')
     #plt.show()
-
+    
+'''fig, ax = plt.subplots(nrows = 3,ncols = 2,figsize = (10,15))
+for i in range(len(categorical_features) - 1):
+    plt.subplot(3,2,i+1)
+    ax = sns.countplot(categorical_features[i],data = data,hue = "HeartDisease",palette = colors,edgecolor = 'black')
+    for rect in ax.patches:
+        ax.text(rect.get_x() + rect.get_width() / 2, rect.get_height() + 2, rect.get_height(), horizontalalignment='center', fontsize = 11)
+    title = categorical_features[i] + ' vs HeartDisease'
+    plt.legend(['No Heart Disease','Heart Disease'])
+    plt.title(title);
+'''
 
 #-----correlation matrix for categorical attributes----
 cat_attributes.append('HeartDisease')
