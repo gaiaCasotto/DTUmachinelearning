@@ -116,7 +116,6 @@ def pca_analysis(X, y, attributeNames):  #returns nothing
     plt.xticks(np.arange(1, len(rho) + 1, 1))
     plt.legend(['Individual','Cumulative','Threshold'])
     plt.grid()
-    plt.show()
     plt.savefig('images/pca_variance.png')
 
     # %% PCA SECTION --> Principal directions of considered PCA components
@@ -135,7 +134,6 @@ def pca_analysis(X, y, attributeNames):  #returns nothing
     plt.legend(legendStrs)
     plt.grid()
     plt.title('PCA Component Coefficients')
-    plt.show()
     plt.savefig('images/PCA_directions.png')
 
     # %% PCA SECTION --> Data projected onto cosnidered principal components
