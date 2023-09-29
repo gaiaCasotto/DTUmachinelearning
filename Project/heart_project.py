@@ -10,8 +10,10 @@ from scipy import stats
 # Load the Heart Disease csv data using the Pandas library
 def get_data_matrix():  #returns X, y, attributeNames
     filename = '../heart.csv'
+    #filename = '/home/codespace/DTUmachinelearning/heart.csv'
     #filename = 'C:\\Users\\clara\\Desktop\\ML_Exercises\\Project_1\\Data\\heart.csv'
     df = pd.read_csv(filename)
+    print(df.describe().T)
     print(round(df['Cholesterol'].corr(df['HeartDisease']),3))
     
     #eliminating the 0s in restingBP  //there is only ONE 0, so we delete it
@@ -74,16 +76,18 @@ def get_data_matrix():  #returns X, y, attributeNames
     attributeNames = df.columns[:-1].values
     return X, y, attributeNames
     
-def get_cont_matrix(matrix, attributeNames):  #returns a matrix
+def get_cont_matrix(matrix, attributeNames):  #returns a matrix and cont_attributes array
     not_cont_att = [1, 2, 5, 6, 8, 10]
     X_cont = np.delete(matrix, not_cont_att, axis=1)
+    print(X_cont)
     X_cont = X_cont.astype(float) #For some reason they are not seen as numbers
-    attributeNames_cont = np.delete(attributeNames, not_cont_att)
-    return X_cont, attributeNames_cont
+    cont_attributes = attributeNames
+    for index in sorted(not_cont_att, reverse=True):
+        cont_attributes = np.delete(cont_attributes, index)
+    return X_cont, cont_attributes
 
 
 def pca_analysis(X, y, attributeNames):  #returns nothing
-#X, y, attributeNames = get_data_matrix()
     N, M = X.shape
     # %% PCA SECTION --> AMount of variation explained as a function of
     # the number of PCA components included
@@ -117,7 +121,8 @@ def pca_analysis(X, y, attributeNames):  #returns nothing
     plt.xticks(np.arange(1, len(rho) + 1, 1))
     plt.legend(['Individual','Cumulative','Threshold'])
     plt.grid()
-    plt.show()
+    #plt.show()
+    plt.savefig('images/pca_variance.png')
 
     # %% PCA SECTION --> Principal directions of considered PCA components
     N,M = X_pca.shape
@@ -135,7 +140,9 @@ def pca_analysis(X, y, attributeNames):  #returns nothing
     plt.legend(legendStrs)
     plt.grid()
     plt.title('PCA Component Coefficients')
-    plt.show()
+    #plt.show()
+    plt.savefig('images/PCA_directions.png')
+
 
     # %% PCA SECTION --> Data projected onto cosnidered principal components
     #Projection:
@@ -150,6 +157,7 @@ def pca_analysis(X, y, attributeNames):  #returns nothing
     plt.legend(['No heart disease', 'Heart disease'])
     plt.xlabel('PC1')
     plt.ylabel('PC2')
+    plt.savefig('images/PCA_projection2D')
     
     # Now in 3D
     fig = plt.figure()
@@ -170,7 +178,8 @@ def pca_analysis(X, y, attributeNames):  #returns nothing
 
     # Adjust the viewing angle (elevation and azimuth angles)
     ax.view_init(elev=30, azim=100)
-    plt.show()
+    #plt.show()
+    plt.savefig('images/PCA_projection3D.png')
 
     # %%
     # Determine the number of rows and columns for the subplots
@@ -202,7 +211,8 @@ def pca_analysis(X, y, attributeNames):  #returns nothing
         fig.delaxes(axs[num_rows - 1, num_cols - 1])
 
     plt.tight_layout()  # Ensures subplots are neatly arranged
-    plt.show()
+    #plt.show()
+    plt.savefig('images/PCA_projection_sub.png')
 
 
     # %% Outliers
@@ -210,15 +220,15 @@ def pca_analysis(X, y, attributeNames):  #returns nothing
     # continuous variables
 
     not_cont_att = [1, 2, 5, 6, 8, 10]
-    X_cont = get_cont_matrix(X)
-    attributeNames_cont = np.delete(attributeNames, not_cont_att)
-
+    X_cont, attributeNames_cont = get_cont_matrix(X, attributeNames)
+    # attributeNames_cont = np.delete(attributeNames, not_cont_att)
+    print(X_cont)
     fig = plt.figure()
     boxplot = sns.boxplot(data=X_cont)  # Replace 'df' with your DataFrame
     plt.title("Box Plot for Outliers")
     boxplot.set_xticklabels(attributeNames_cont)
-    plt.show()
-    fig.savefig('outliers_boxplot.png')
+    #plt.show()
+    fig.savefig('images/outliers_boxplot.png')
 
 
     # %% Normal disttribution?
@@ -237,8 +247,8 @@ def pca_analysis(X, y, attributeNames):  #returns nothing
 
     # Display histograms
     plt.tight_layout()
-    plt.savefig('histograms.png')
-    plt.show()
+    plt.savefig('images/histograms.png')
+    #plt.show()
 
     # Display the results of normality test
     for column, p_value in normality_results:
@@ -260,8 +270,8 @@ def data_analysis(X_cont, y, attributeNames_cont):
     boxplot = sns.boxplot(data=X_cont)  # Replace 'df' with your DataFrame
     plt.title("Box Plot for Outliers")
     boxplot.set_xticklabels(attributeNames_cont)
-    plt.show()
-    fig.savefig('outliers_boxplot.png')
+    #plt.show()
+    fig.savefig('images/outliers_boxplot.png')
     
      # %% Normal disttribution?
     # Create histograms for each attribute and do normality test
@@ -279,8 +289,8 @@ def data_analysis(X_cont, y, attributeNames_cont):
 
     # Display histograms
     plt.tight_layout()
-    plt.savefig('histograms.png')
-    plt.show()
+    plt.savefig('images/histograms.png')
+    #plt.show()
 
     # Display the results of normality test
     for column, p_value in normality_results:

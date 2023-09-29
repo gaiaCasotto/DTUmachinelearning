@@ -6,6 +6,8 @@ import heart_project as data
 from scipy.stats import chi2_contingency
 
 
+path = '/home/codespace/DTUmachinelearning/Project/images'
+
 #---DEFINE FUNCTION----> get categorical matrix
 def get_cat_matrix(X):
     #not_cont_att = [1, 2, 5, 6, 8, 10]
@@ -15,17 +17,20 @@ def get_cat_matrix(X):
 
 
 X, y, attribute_names = data.get_data_matrix()
-X_cont = data.get_cont_matrix(X) #matrix of continuous values
+X_cont, cont_attributes = data.get_cont_matrix(X, attribute_names) #matrix of continuous values
+
+data.data_analysis(X_cont, y, cont_attributes)
+data.pca_analysis(X, y, attribute_names)
 
 print(y)
 print(len(attribute_names))
 not_cont_att = [1, 2, 5, 6, 8, 10]
 
 #---SCATTER PLOTS FOR CONTINUOUS ATTRUBUTES----
-cont_attributes = attribute_names
+'''cont_attributes = attribute_names
 for index in sorted(not_cont_att, reverse=True):
     cont_attributes = np.delete(cont_attributes, index)
-
+'''
 a_len = len(cont_attributes)
 print(a_len)
 print(cont_attributes)
@@ -63,7 +68,9 @@ correlation_matrix = df_cont.corr()
 plt.figure(figsize=(10, 8))
 sns.heatmap(correlation_matrix, annot=True, cmap="coolwarm", fmt=".2f", linewidths=0.5)
 plt.title('Correlation Heatmap of Continuous Attributes with HeartDisease')
-plt.savefig('images/CorrelationHeatmap.png')
+#full_path = path + 'CorrelationHeatmap.png'
+full_path = 'images/CorrelationHeatmap.png'
+plt.savefig(full_path)
 #plt.show()
 
     
@@ -118,3 +125,4 @@ sns.heatmap(chi2_stats.astype(float), annot=True, cmap="coolwarm", fmt=".2f", li
 plt.title('Chi-Squared Correlation Heatmap of Categorical Attributes')
 #plt.show()
 plt.savefig('images/CorrelationHeatmapCategorical.png')
+
