@@ -3,12 +3,7 @@ import numpy as np
 import heart_project as data
 from scipy.stats import zscore
 import pandas as pd
-<<<<<<< HEAD
 from matplotlib.pyplot import figure, subplot, savefig, hist, ylim, title, plot, legend, show,  xlabel, ylabel, xticks, yticks
-=======
-from matplotlib.pyplot import figure, subplot, plot, legend, show,  xlabel, ylabel, xticks, yticks
-import matplotlib.pyplot as plt
->>>>>>> d69dc15defd0034110ef20d5759665629945ac89
 
 #get data from data preprocessing file
 [X, y, attributeNames] = data.get_data_matrix() #matrix of continous values
@@ -60,14 +55,14 @@ for m1 in range(NumAtr):
             #xlim(0,X.max()*1.1)
 legend(classNames)
 show()
-plt.savefig('images/scatterplot_matrix.png')
+savefig('images/scatterplot_matrix.png')
 
 ## Correlation matrix including y and binary attrs.
 not_include_att = [2, 6, 10]
 X_new = np.delete(X, not_include_att, axis=1)
 X_new = X_new.astype(float) #For some reason they are not seen as numbers
 attributeNames_new = np.delete(attributeNames, not_include_att)
-plt.savefig('images/corr_matrix_y_binary.png')
+savefig('images/corr_matrix_y_binary.png')
 
 
 #Standardize the data:
