@@ -117,6 +117,7 @@ def pca_analysis(X, y, attributeNames):  #returns nothing
     plt.legend(['Individual','Cumulative','Threshold'])
     plt.grid()
     #plt.show()
+    plt.savefig('images/pca_variance.png')
 
     # %% PCA SECTION --> Principal directions of considered PCA components
     N,M = X_pca.shape
@@ -135,6 +136,8 @@ def pca_analysis(X, y, attributeNames):  #returns nothing
     plt.grid()
     plt.title('PCA Component Coefficients')
     #plt.show()
+    plt.savefig('images/PCA_directions.png')
+
 
     # %% PCA SECTION --> Data projected onto cosnidered principal components
     #Projection:
@@ -149,6 +152,7 @@ def pca_analysis(X, y, attributeNames):  #returns nothing
     plt.legend(['No heart disease', 'Heart disease'])
     plt.xlabel('PC1')
     plt.ylabel('PC2')
+    plt.savefig('images/PCA_projection2D')
     
     # Now in 3D
     fig = plt.figure()
@@ -170,6 +174,7 @@ def pca_analysis(X, y, attributeNames):  #returns nothing
     # Adjust the viewing angle (elevation and azimuth angles)
     ax.view_init(elev=30, azim=100)
     #plt.show()
+    plt.savefig('images/PCA_projection3D.png')
 
     # %%
     # Determine the number of rows and columns for the subplots
@@ -202,6 +207,7 @@ def pca_analysis(X, y, attributeNames):  #returns nothing
 
     plt.tight_layout()  # Ensures subplots are neatly arranged
     #plt.show()
+    plt.savefig('images/PCA_projection_sub.png')
 
 
     # %% Outliers
