@@ -116,7 +116,7 @@ def pca_analysis(X, y, attributeNames):  #returns nothing
     plt.xticks(np.arange(1, len(rho) + 1, 1))
     plt.legend(['Individual','Cumulative','Threshold'])
     plt.grid()
-    plt.show()
+    #plt.show()
 
     # %% PCA SECTION --> Principal directions of considered PCA components
     N,M = X_pca.shape
@@ -134,7 +134,7 @@ def pca_analysis(X, y, attributeNames):  #returns nothing
     plt.legend(legendStrs)
     plt.grid()
     plt.title('PCA Component Coefficients')
-    plt.show()
+    #plt.show()
 
     # %% PCA SECTION --> Data projected onto cosnidered principal components
     #Projection:
@@ -169,7 +169,7 @@ def pca_analysis(X, y, attributeNames):  #returns nothing
 
     # Adjust the viewing angle (elevation and azimuth angles)
     ax.view_init(elev=30, azim=100)
-    plt.show()
+    #plt.show()
 
     # %%
     # Determine the number of rows and columns for the subplots
@@ -201,7 +201,7 @@ def pca_analysis(X, y, attributeNames):  #returns nothing
         fig.delaxes(axs[num_rows - 1, num_cols - 1])
 
     plt.tight_layout()  # Ensures subplots are neatly arranged
-    plt.show()
+    #plt.show()
 
 
     # %% Outliers
@@ -216,7 +216,7 @@ def pca_analysis(X, y, attributeNames):  #returns nothing
     boxplot = sns.boxplot(data=X_cont)  # Replace 'df' with your DataFrame
     plt.title("Box Plot for Outliers")
     boxplot.set_xticklabels(attributeNames_cont)
-    plt.show()
+    #plt.show()
     fig.savefig('images/outliers_boxplot.png')
 
 
@@ -237,7 +237,7 @@ def pca_analysis(X, y, attributeNames):  #returns nothing
     # Display histograms
     plt.tight_layout()
     plt.savefig('images/histograms.png')
-    plt.show()
+    #plt.show()
 
     # Display the results of normality test
     for column, p_value in normality_results:
@@ -259,7 +259,7 @@ def data_analysis(X_cont, y, attributeNames_cont):
     boxplot = sns.boxplot(data=X_cont)  # Replace 'df' with your DataFrame
     plt.title("Box Plot for Outliers")
     boxplot.set_xticklabels(attributeNames_cont)
-    plt.show()
+    #plt.show()
     fig.savefig('images/outliers_boxplot.png')
     
      # %% Normal disttribution?
@@ -279,7 +279,7 @@ def data_analysis(X_cont, y, attributeNames_cont):
     # Display histograms
     plt.tight_layout()
     plt.savefig('images/histograms.png')
-    plt.show()
+    #plt.show()
 
     # Display the results of normality test
     for column, p_value in normality_results:
