@@ -13,12 +13,17 @@ def get_data_matrix():  #returns X, y, attributeNames
     #filename = 'C:\\Users\\clara\\Desktop\\ML_Exercises\\Project_1\\Data\\heart.csv'
     df = pd.read_csv(filename)
     print(round(df['Cholesterol'].corr(df['HeartDisease']),3))
+    
     #eliminating the 0s in restingBP  //there is only ONE 0, so we delete it
     for i in range(len(df['RestingBP'])):
         if df['RestingBP'].values[i] == 0:
             df = df.drop(i)
             break; #There is only one
         
+    # Converting oldpeak negative values to positive    
+    # Oldpeak is column 9, we convert it to positive
+    X[:,9] = np.abs(X[:,9])
+    
     # For sex, Female = 0, Male = 1
     sex_Labels = df['Sex']
     sex_Names = np.unique(sex_Labels)

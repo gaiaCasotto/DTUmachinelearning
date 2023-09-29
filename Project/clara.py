@@ -3,14 +3,14 @@ import numpy as np
 import heart_project as data
 from scipy.stats import zscore
 import pandas as pd
-from matplotlib.pyplot import figure, subplot, plot, legend, show,  xlabel, ylabel, xticks, yticks
+from matplotlib.pyplot import figure, subplot, savefig, hist, ylim, title, plot, legend, show,  xlabel, ylabel, xticks, yticks
 
 #get data from data preprocessing file
 [X, y, attributeNames] = data.get_data_matrix() #matrix of continous values
 #[X_cont, attributeNames_cont] = data.get_cont_matrix(X, attributeNames)
 
-# STslope is column 9, we convert it to positive
-X[:,9] = np.abs(X[:,9])
+# Oldpeak is column 9, we convert it to positive
+#X[:,9] = np.abs(X[:,9])
 
 not_cont_att = [1, 2, 5, 6, 8, 10]
 X_cont = np.delete(X, not_cont_att, axis=1)
@@ -22,6 +22,18 @@ attributeNames_cont = np.delete(attributeNames, not_cont_att)
 X_standard = zscore(X_cont, ddof= 1)
 
 data.data_analysis(X_standard, y, attributeNames_cont)
+
+## Weird histogram for outliers
+figure(figsize=(14,9))
+m = [1, 2, 4] #RestingBP, Cholesterol and Oldpeak
+for i in range(len(m)):
+    subplot(1,len(m),i+1)
+    hist(X_standard[:,m[i]],50)
+    xlabel(attributeNames_cont[m[i]])
+    ylim(0, 400) # Make the y-axes equal for improved readability
+    if i>0: yticks([])
+    if i==0: title('Histogram (selected attributes)')
+savefig('hist_selected_attrs.png')
 
 ## Scatter plot (matrix)
 NumAtr = len(attributeNames_cont)
