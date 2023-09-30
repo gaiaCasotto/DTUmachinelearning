@@ -136,11 +136,11 @@ def pca_analysis(X, y, attributeNames):  #returns nothing
 
     # %% PCA SECTION --> Principal directions of considered PCA components
     N,M = X_pca.shape
-    num_pcs = 4
+    num_pcs = 3
     pcs = np.arange(0,num_pcs)
     legendStrs = ['PC'+str(e+1) for e in pcs]
     c = ['r','g','b']
-    bw = .11
+    bw = .2
     r = np.arange(1,M+1)
     plt.figure(figsize=(10, 8))
     for i in pcs:
