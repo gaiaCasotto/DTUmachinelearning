@@ -142,7 +142,7 @@ for attribute1 in cat_attributes:
             chi2_stats.at[attribute1, attribute2] = chi2
 
 # Create a heatmap of chi-squared statistics
-plt.figure(figsize=(10, 8))
+plt.figure(figsize=(12, 10))
 sns.heatmap(chi2_stats.astype(float), annot=True, cmap="coolwarm", fmt=".2f", linewidths=0.5)
 plt.title('Chi-Squared Correlation Heatmap of Categorical Attributes')
 #plt.show()
