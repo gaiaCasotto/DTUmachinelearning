@@ -5,8 +5,9 @@ import matplotlib.pyplot as plt
 from scipy.linalg import svd
 import seaborn as sns
 from scipy import stats
+from sklearn.preprocessing import LabelEncoder
 
-
+    
 # Load the Heart Disease csv data using the Pandas library
 def get_data_matrix():  #returns X, y, attributeNames
     filename = '../heart.csv'
@@ -21,10 +22,6 @@ def get_data_matrix():  #returns X, y, attributeNames
         if df['RestingBP'].values[i] == 0:
             df = df.drop(i)
             break; #There is only one
-        
-    # Converting oldpeak negative values to positive    
-    # Oldpeak is column 9, we convert it to positive
-    X[:,9] = np.abs(X[:,9])
     
     # For sex, Female = 0, Male = 1
     sex_Labels = df['Sex']
@@ -39,7 +36,16 @@ def get_data_matrix():  #returns X, y, attributeNames
     EA_Dict = dict(zip(EA_Names,range(len(EA_Labels))))
     EA_column = np.array([EA_Dict[EA] for EA in EA_Labels])
     df['ExerciseAngina'] = EA_column
-
+    
+    #maps cat attributes to numbers
+    le = LabelEncoder()
+    df['ChestPainType'] = le.fit_transform(df['ChestPainType'])
+    df['RestingECG'] = le.fit_transform(df['RestingECG'])
+    #ST_SLope Flat = 0, Up = 1, Down = -1
+    slope_mapping = {'Down': -1, 'Flat': 0, 'Up': 1}
+    df['ST_Slope'] = df['ST_Slope'].map(slope_mapping)
+    
+    
     df_with_cvd = df[df['HeartDisease'] == 1]
     df_healthy  = df[df['HeartDisease'] == 0]
     X_with_cvd  = df_with_cvd.drop(columns=['HeartDisease']).values
@@ -51,7 +57,11 @@ def get_data_matrix():  #returns X, y, attributeNames
     X = df.drop(columns=['HeartDisease']).values #maybe we should invert these lines?
     y = df['HeartDisease'].values
     #print(f"printing y {y}")
-
+    
+    # Converting oldpeak negative values to positive
+    # Oldpeak is column 9, we convert it to positive
+    X[:,9] = np.abs(X[:,9])
+    
     # Replace 0 values in column 4 (chol) with NaN
     X[X[:, 4] == 0, 4] = np.nan
     X_with_cvd[X_with_cvd[:, 4] == 0, 4] = np.nan
@@ -126,15 +136,16 @@ def pca_analysis(X, y, attributeNames):  #returns nothing
 
     # %% PCA SECTION --> Principal directions of considered PCA components
     N,M = X_pca.shape
-    num_pcs = 4
+    num_pcs = 3
     pcs = np.arange(0,num_pcs)
     legendStrs = ['PC'+str(e+1) for e in pcs]
     c = ['r','g','b']
-    bw = .11
+    bw = .2
     r = np.arange(1,M+1)
+    plt.figure(figsize=(10, 8))
     for i in pcs:
         plt.bar(r+i*bw, V[:,i], width=bw)
-    plt.xticks(r+bw, attributeNames_cont)
+    plt.xticks(r+bw, attributeNames_cont, rotation=30)
     plt.xlabel('Attributes')
     plt.ylabel('Component coefficients')
     plt.legend(legendStrs)
