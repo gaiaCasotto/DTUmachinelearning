@@ -1,6 +1,6 @@
 #Regression part A
 import numpy as np
-import heart_project as data
+import preprocessing_lib as data
 from scipy.stats import zscore
 from toolbox_02450 import rlr_validate
 from matplotlib.pyplot import figure, subplot, savefig, semilogx, loglog, title, grid, legend, show,  xlabel, ylabel, xticks, yticks
