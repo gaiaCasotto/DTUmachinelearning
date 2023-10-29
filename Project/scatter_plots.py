@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-import heart_project as data
+import preprocessing_lib as data
 from scipy.stats import chi2_contingency
 
 

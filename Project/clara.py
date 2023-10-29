@@ -1,6 +1,6 @@
 #summary statistics for report 1
 import numpy as np
-import heart_project as data
+import preprocessing_lib as data
 from scipy.stats import zscore
 import pandas as pd
 from matplotlib.pyplot import figure, subplot, savefig, hist, ylim, title, plot, legend, show,  xlabel, ylabel, xticks, yticks
