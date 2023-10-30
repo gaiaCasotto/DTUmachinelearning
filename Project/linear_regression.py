@@ -1,12 +1,12 @@
 # linear_regression.py
 
 # exercise 5.2.4
-from matplotlib.pylab import figure, subplot, plot, xlabel, ylabel, hist, show
+from matplotlib.pylab import figure, subplot, plot, xlabel, ylabel, hist, show, savefig
 import sklearn.linear_model as lm
 import numpy as np
 
 #gets data from heart_project
-import heart_project as data
+import preprocessing_lib as data
 
 
 #get data
@@ -45,6 +45,7 @@ for att in cont_attributes:
     xlabel(x_lab); ylabel(y_lab);
     subplot(2,1,2)
     hist(residual,40)
-    show()
+    #show()
+    savefig('images/regressionPlot' + att + '.png')
 
 print('Ran Exercise 5.2.4')
