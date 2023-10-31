@@ -1,7 +1,5 @@
-# exercise 8.1.1
-
-from matplotlib.pylab import (figure, semilogx, loglog, xlabel, ylabel, legend, 
-                           title, subplot, show, grid)
+#to select the optimal value of the regularization parameter λ
+from matplotlib.pylab import (figure, semilogx, loglog, xlabel, ylabel, legend, title, subplot, show, grid)
 import numpy as np
 import preprocessing_lib as pplib
 from scipy.io import loadmat
@@ -9,22 +7,25 @@ import sklearn.linear_model as lm
 from sklearn import model_selection
 from toolbox_02450 import rlr_validate
 
+#load data
 X, y, attribute_names = pplib.get_data_matrix()
+X, y, attribute_names = pplib.change_y(X, y, attribute_names, 'HeartDisease', 'MaxHR') #with maxHR, training/test error jump from 0.12 to over 400 for some reason??????
 N, M = X.shape
 
 # Add offset attribute
 X = np.concatenate((np.ones((X.shape[0],1)),X),1)
-attributeNames = [u'Offset']+attributeNames
-M = M+1
+attribute_names = [u'Offset']+attribute_names
+M = M+1  #WHY????
 
 ## Crossvalidation
-# Create crossvalidation partition for evaluation
-K = 5
+# Create crossvalidation partition for evaluation pf the optimal value of lambda
+K = 5   #OUTER LOOP.
 CV = model_selection.KFold(K, shuffle=True)
 #CV = model_selection.KFold(K, shuffle=False)
 
-# Values of lambda
+# 14 Values of lambda
 lambdas = np.power(10.,range(-5,9))
+print(f"lambdas: {len(lambdas)}")
 
 # Initialize variables
 #T = len(lambdas)
@@ -51,9 +52,7 @@ for train_index, test_index in CV.split(X,y):
     
     opt_val_err, opt_lambda, mean_w_vs_lambda, train_err_vs_lambda, test_err_vs_lambda = rlr_validate(X_train, y_train, lambdas, internal_cross_validation)
 
-    # Standardize outer fold based on training set, and save the mean and standard
-    # deviations since they're part of the model (they would be needed for
-    # making new predictions) - for brevity we won't always store these in the scripts
+    # Standardize outer fold based on training set, and save the mean and standard deviations since they're part of the model (they would be needed for making new predictions) - for brevity we won't always store these in the scripts
     mu[k, :] = np.mean(X_train[:, 1:], 0)
     sigma[k, :] = np.std(X_train[:, 1:], 0)
     
@@ -67,6 +66,7 @@ for train_index, test_index in CV.split(X,y):
     Error_train_nofeatures[k] = np.square(y_train-y_train.mean()).sum(axis=0)/y_train.shape[0]
     Error_test_nofeatures[k] = np.square(y_test-y_test.mean()).sum(axis=0)/y_test.shape[0]
 
+    print(f"opt_lambda is {opt_lambda}")
     # Estimate weights for the optimal value of lambda, on entire training set
     lambdaI = opt_lambda * np.eye(M)
     lambdaI[0,0] = 0 # Do no regularize the bias term
@@ -86,24 +86,25 @@ for train_index, test_index in CV.split(X,y):
     #Error_test[k] = np.square(y_test-m.predict(X_test)).sum()/y_test.shape[0]
 
     # Display the results for the last cross-validation fold
-    if k == K-1:
-        figure(k, figsize=(12,8))
-        subplot(1,2,1)
-        semilogx(lambdas,mean_w_vs_lambda.T[:,1:],'.-') # Don't plot the bias term
-        xlabel('Regularization factor')
-        ylabel('Mean Coefficient Values')
-        grid()
+    '''if k == K-1:'''
+    '''the original code only showed the last plot'''
+    figure(k, figsize=(12,8))
+    subplot(1,2,1)
+    semilogx(lambdas,mean_w_vs_lambda.T[:,1:],'.-') # Don't plot the bias term
+    xlabel('Regularization factor')
+    ylabel('Mean Coefficient Values')
+    grid()
         # You can choose to display the legend, but it's omitted for a cleaner 
         # plot, since there are many attributes
         #legend(attributeNames[1:], loc='best')
         
-        subplot(1,2,2)
-        title('Optimal lambda: 1e{0}'.format(np.log10(opt_lambda)))
-        loglog(lambdas,train_err_vs_lambda.T,'b.-',lambdas,test_err_vs_lambda.T,'r.-')
-        xlabel('Regularization factor')
-        ylabel('Squared error (crossvalidation)')
-        legend(['Train error','Validation error'])
-        grid()
+    subplot(1,2,2)
+    title('Optimal lambda: 1e{0}'.format(np.log10(opt_lambda)))
+    loglog(lambdas,train_err_vs_lambda.T,'b.-',lambdas,test_err_vs_lambda.T,'r.-')
+    xlabel('Regularization factor')
+    ylabel('Squared error (crossvalidation)')
+    legend(['Train error','Validation error'])
+    grid()
     
     # To inspect the used indices, use these print statements
     #print('Cross validation fold {0}/{1}:'.format(k+1,K))
@@ -111,8 +112,10 @@ for train_index, test_index in CV.split(X,y):
     #print('Test indices: {0}\n'.format(test_index))
 
     k+=1
+    show()
 
-show()
+
+#show()
 # Display results
 print('Linear regression without feature selection:')
 print('- Training error: {0}'.format(Error_train.mean()))
@@ -126,7 +129,7 @@ print('- R^2 train:     {0}'.format((Error_train_nofeatures.sum()-Error_train_rl
 print('- R^2 test:     {0}\n'.format((Error_test_nofeatures.sum()-Error_test_rlr.sum())/Error_test_nofeatures.sum()))
 
 print('Weights in last fold:')
-for m in range(M):
-    print('{:>15} {:>15}'.format(attributeNames[m], np.round(w_rlr[m,-1],2)))
+for m in range(M - 1):
+    print(m)
+    print('{:>15} {:>15}'.format(attribute_names[m], np.round(w_rlr[m,-1],2)))
 
-print('Ran Exercise 8.1.1')

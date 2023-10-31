@@ -8,7 +8,16 @@ import seaborn as sns
 from scipy import stats
 from sklearn.preprocessing import LabelEncoder
 
-    
+
+def change_y(X, y, attrNames, yName, newYName):
+    df = pd.DataFrame(X, columns = attrNames)
+    df[yName] = y
+    X = df.drop(columns=[newYName]).values #maybe we should invert these lines?
+    y = df[newYName].values
+    attrNames = np.append(attrNames, yName)
+    attrNames = np.delete(attrNames, np.where(attrNames == newYName))
+    return X, y, attrNames
+
 # Load the Heart Disease csv data using the Pandas library
 def get_data_matrix():  #returns X, y, attributeNames
     filename = '../heart.csv'
