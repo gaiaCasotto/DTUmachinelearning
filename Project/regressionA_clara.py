@@ -1,25 +1,35 @@
 #Regression part A
 import numpy as np
-import preprocessing_lib as data
+import preprocessing_lib as pplib
 from scipy.stats import zscore
 from sklearn import model_selection
 from toolbox_02450 import rlr_validate
 from matplotlib.pyplot import figure, subplot, savefig, semilogx, loglog, title, grid, legend, show,  xlabel, ylabel, xticks, yticks
 
 #get data from data preprocessing file
-[X, y2, attributeNames] = data.get_data_matrix() #matrix of continous value
+[X, y2, attributeNames] = pplib.get_data_matrix() #matrix of continous value
 
 y2 = y2.reshape(-1, 1) # to make it iof size (917,1)
 # Add offset attribute
 MaxHR_index = 7
+y = X[:, MaxHR_index]
 X = np.delete(X, MaxHR_index, axis=1)
 attributeNames = np.delete(attributeNames, MaxHR_index)
 X = np.concatenate((np.ones((X.shape[0],1)),X),1)
 attributeNames = np.concatenate((['Offset'], attributeNames))
 X = np.concatenate((X, y2),1)
-y = X[:, MaxHR_index]
 attributeNames = np.concatenate((attributeNames, ['Heart_disease']))
 N, M = X.shape
+
+# #load data
+# X, y, attributeNames = pplib.get_data_matrix()
+# X, y, attributeNames = pplib.change_y(X, y, attributeNames, 'HeartDisease', 'MaxHR') #with maxHR, training/test error jump from 0.12 to over 400 for some reason??????
+# N, M = X.shape
+
+# # Add offset attribute
+# X = np.concatenate((np.ones((X.shape[0],1)),X),1)
+# attributeNames = [u'Offset']+attributeNames
+# M = M+1  #WHY????
 
 ## Crossvalidation
 # Create crossvalidation partition for evaluation
@@ -28,8 +38,8 @@ CV = model_selection.KFold(K, shuffle=True)
 #CV = model_selection.KFold(K, shuffle=False)
 
 # Values of lambda
-# lambdas = np.power(10.,range(-20,-10))
-lambdas = np.logspace(0, 4, 50)
+lambdas = np.power(10.,range(-5,9))
+# lambdas = np.logspace(0, 4, 50)
 
 # Initialize variables
 #T = len(lambdas)
