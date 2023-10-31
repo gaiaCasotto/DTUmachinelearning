@@ -9,7 +9,7 @@ from toolbox_02450 import rlr_validate
 
 #load data
 X, y, attribute_names = pplib.get_data_matrix()
-#X, y, attribute_names = pplib.change_y(X, y, attribute_names, 'HeartDisease', 'MaxHR')
+X, y, attribute_names = pplib.change_y(X, y, attribute_names, 'HeartDisease', 'MaxHR') #with maxHR, training/test error jump from 0.12 to over 400 for some reason??????
 N, M = X.shape
 
 # Add offset attribute
@@ -23,8 +23,9 @@ K = 5   #OUTER LOOP.
 CV = model_selection.KFold(K, shuffle=True)
 #CV = model_selection.KFold(K, shuffle=False)
 
-# Values of lambda
+# 14 Values of lambda
 lambdas = np.power(10.,range(-5,9))
+print(f"lambdas: {len(lambdas)}")
 
 # Initialize variables
 #T = len(lambdas)
