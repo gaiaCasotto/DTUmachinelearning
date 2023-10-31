@@ -14,7 +14,7 @@ N, M = X.shape
 
 # Add offset attribute
 X = np.concatenate((np.ones((X.shape[0],1)),X),1)
-attribute_names = [u'Offset']+attribute_names
+attribute_names = np.concatenate((['Offset'], attribute_names))
 M = M+1  #WHY????
 
 ## Crossvalidation
@@ -129,7 +129,6 @@ print('- R^2 train:     {0}'.format((Error_train_nofeatures.sum()-Error_train_rl
 print('- R^2 test:     {0}\n'.format((Error_test_nofeatures.sum()-Error_test_rlr.sum())/Error_test_nofeatures.sum()))
 
 print('Weights in last fold:')
-for m in range(M - 1):
-    print(m)
+for m in range(M):
     print('{:>15} {:>15}'.format(attribute_names[m], np.round(w_rlr[m,-1],2)))
 
