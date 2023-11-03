@@ -6,6 +6,7 @@ from scipy.io import loadmat
 import sklearn.linear_model as lm
 from sklearn import model_selection
 from toolbox_02450 import rlr_validate
+from scipy import stats
 
 #load data
 X, y, attribute_names = pplib.get_data_matrix()
@@ -15,8 +16,7 @@ N, M = X.shape
 # Add offset attribute
 X = np.concatenate((np.ones((X.shape[0],1)),X),1)
 attribute_names = np.concatenate((['Offset'], attribute_names))
-M = M+1  #WHY????
-
+M = M+1 
 
 ###########
 
@@ -76,7 +76,6 @@ for train_index, test_index in CV.split(X,y):
     
     f=f+1
 
-# TODO: keep the w of the best lambda!
  
 Error_test_rlr = np.min(np.mean(test_error,axis=0)) # Error_test_rlr
 Error_train_rlr = np.min(np.mean(train_error,axis=0))
