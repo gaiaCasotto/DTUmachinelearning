@@ -9,7 +9,7 @@ from toolbox_02450 import rlr_validate
 
 #load data
 X, y, attribute_names = pplib.get_data_matrix()
-X, y, attribute_names = pplib.change_y(X, y, attribute_names, 'HeartDisease', 'MaxHR') #with maxHR, training/test error jump from 0.12 to over 400 for some reason??????
+X, y, attribute_names = pplib.change_y(X, y, attribute_names, 'HeartDisease', 'Age') #with maxHR, training/test error jump from 0.12 to over 400 for some reason??????
 N, M = X.shape
 
 # Add offset attribute
