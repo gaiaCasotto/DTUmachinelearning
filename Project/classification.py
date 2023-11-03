@@ -6,7 +6,7 @@ from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.naive_bayes import GaussianNB
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
-from sklearn.model_selection import GridSearchCV
+#from sklearn.model_selection import GridSearchCV
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import cross_val_score
@@ -48,7 +48,8 @@ for k in range(1, 11):
 
 #method 2 option 3: ANN
 from sklearn.neural_network import MLPClassifier
-clf = MLPClassifier(solver='lbfgs', alpha=1e-5,                               hidden_layer_sizes=(5, 2), random_state=1)
+clf = MLPClassifier()
+#clf = MLPClassifier(solver='lbfgs', alpha=1e-5,                               hidden_layer_sizes=(5, 2), random_state=1)
 clf = clf.fit(X_train, y_train)
 y_pred = clf.predict(X_test)
 print("NN Accuracy:", accuracy_score(y_test, y_pred))
@@ -61,6 +62,7 @@ print("NB Accuracy:", accuracy_score(y_test, y_pred))
 
 #logistic regression:
 
+'''need to add parameter lambda'''
 #normalization
 #X_train=(X_train-np.min(X_train))/(np.max(X_train)-np.min(X_train)).values
 #X_test=(X_test-np.min(X_test))/(np.max(X_test)-np.min(X_test)).values
