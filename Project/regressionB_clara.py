@@ -46,8 +46,8 @@ opt_lambdas = np.empty((K1,1))
 
 ## ANN
 n_hidden_units_values = np.arange(1, 6) 
-n_replicates = 2       # number of networks trained in each k-fold
-max_iter = 20000
+n_replicates = 1       # number of networks trained in each k-fold
+max_iter = 15000
 Error_train_ann = []
 Error_test_ann = []
 
