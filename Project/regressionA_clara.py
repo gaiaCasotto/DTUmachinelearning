@@ -22,7 +22,7 @@ M = M+1  #WHY????
 
 cvf = 10 # K folds
 # lambdas = np.power(10.,range(-5,9))
-lambdas = np.logspace(0, 4, 50)
+lambdas = np.logspace(0, 4, 100)
 print(f"lambdas: {len(lambdas)}")
 
 CV = model_selection.KFold(cvf, shuffle=True)
@@ -76,12 +76,18 @@ for train_index, test_index in CV.split(X,y):
     
     f=f+1
 
+# TODO: keep the w of the best lambda!
+ 
 Error_test_rlr = np.min(np.mean(test_error,axis=0)) # Error_test_rlr
 Error_train_rlr = np.min(np.mean(train_error,axis=0))
 opt_lambda = lambdas[np.argmin(np.mean(test_error,axis=0))]
 train_err_vs_lambda = np.mean(train_error,axis=0)
 test_err_vs_lambda = np.mean(test_error,axis=0)
 mean_w_vs_lambda = np.squeeze(np.mean(w,axis=1))
+
+
+opt_lambda_ix = np.where(lambdas==opt_lambda)[0]
+w_opt_lambda = w[:, :, opt_lambda_ix].squeeze()
 
 
 print(f"opt_lambda is {opt_lambda}")
@@ -120,6 +126,6 @@ print('- R^2 train:     {0}'.format((Error_train_nofeatures.sum()-Error_train_rl
 print('- R^2 test:     {0}\n'.format((Error_test_nofeatures.sum()-Error_test_rlr)/Error_test_nofeatures.sum()))
 
 print('Weights:')
-#for m in range(M):
-#    print('{:>15} {:>15}'.format(attribute_names[m], np.round(w_rlr[m,-1],2)))
+for m in range(M):
+    print('{:>15} {:>15}'.format(attribute_names[m], np.round(w_opt_lambda[m,-1],2)))
 
