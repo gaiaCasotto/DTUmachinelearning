@@ -37,8 +37,9 @@ if do_pca_preprocessing:
 
 
 # Parameters for neural network classifier
-n_hidden_units = 10     # number of hidden units
-n_replicates = 1       # number of networks trained in each k-fold
+n_hidden_units = 5     # number of hidden units
+n_hidden_units2 = 3
+n_replicates = 2       # number of networks trained in each k-fold
 max_iter = 100000
 
 # K-fold crossvalidation
@@ -53,10 +54,10 @@ color_list = ['tab:orange', 'tab:green', 'tab:purple', 'tab:brown', 'tab:pink',
 # Define the model
 model = lambda: torch.nn.Sequential(
     torch.nn.Linear(M, n_hidden_units),  # M features to n_hidden_units
-    torch.nn.Tanh(),  # 1st transfer function
-    torch.nn.Linear(n_hidden_units, n_hidden_units),  # Add another hidden layer with n_hidden_units units
-    torch.nn.Tanh(),  # 2nd transfer function
-    torch.nn.Linear(n_hidden_units, 1),  # n_hidden_units to 1 output neuron
+    torch.nn.ReLU(),  # 1st transfer function
+    torch.nn.Linear(n_hidden_units, n_hidden_units2),  # Add another hidden layer with n_hidden_units units
+    torch.nn.ReLU(),  # 2nd transfer function
+    torch.nn.Linear(n_hidden_units2, 1),  # n_hidden_units to 1 output neuron
     # no final transfer function, i.e. "linear output"
 )
 loss_fn = torch.nn.MSELoss() # notice how this is now a mean-squared-error loss
