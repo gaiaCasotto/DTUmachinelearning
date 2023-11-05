@@ -27,8 +27,8 @@ y_ann = np.expand_dims(y, axis=1)
 
 ## Crossvalidation
 # Create crossvalidation partition for evaluation
-K1 = 10
-K2 = 10
+K1 = 5
+K2 = 5
 CV = model_selection.KFold(K1, shuffle=True)
 
 ## Baseline
@@ -48,8 +48,9 @@ opt_lambdas = np.empty((K1,1))
 n_hidden_units_values = np.arange(1, 6) 
 n_replicates = 1       # number of networks trained in each k-fold
 max_iter = 15000
-Error_train_ann = []
-Error_test_ann = []
+Error_train_ann = np.empty((K1,1))
+Error_test_ann = np.empty((K1,1))
+opt_n_hidden_units = np.empty((K1,1))
 
 k=0
 for train_index, test_index in CV.split(X,y):
@@ -95,10 +96,25 @@ for train_index, test_index in CV.split(X,y):
     X_train_ann = X_ann[train_index]
     y_train_ann = y_ann[train_index]
     X_test_ann = X_ann[test_index]
-    y_test_ann = y_ann[test_index]  
+    y_test_ann = y_ann[test_index] 
     
-    for n_hidden_units1 in n_hidden_units_values:
-        for n_hidden_units2 in range(1, n_hidden_units1+1):
+    # inner loop:
+    CV2 = model_selection.KFold(K2, shuffle=True)
+    errors_test = np.empty((K2,len(n_hidden_units_values)))
+    errors_train = np.empty((K2,len(n_hidden_units_values)))
+    # y_train_ann = y_train_ann.squeeze()
+     
+    for (k2, (train_index, test_index)) in enumerate(CV2.split(X,y)):
+        # Extract training and test set for current CV fold, convert to tensors
+        X_train = torch.Tensor(X[train_index,:])
+        y_train = torch.Tensor(y[train_index])
+        X_test = torch.Tensor(X[test_index,:])
+        y_test = torch.Tensor(y[test_index])
+        
+        for n in range(0, len(n_hidden_units_values)):
+        # for n_hidden_units2 in range(1, n_hidden_units1+1):
+            n_hidden_units1 = n_hidden_units_values[n]
+            n_hidden_units2 = n_hidden_units1
             model = lambda: torch.nn.Sequential(
                 torch.nn.Linear(M, n_hidden_units1),  # M features to n_hidden_units
                 torch.nn.ReLU(),  # 1st transfer function
@@ -108,40 +124,34 @@ for train_index, test_index in CV.split(X,y):
                 # no final transfer function, i.e. "linear output"
             )
             loss_fn = torch.nn.MSELoss() # notice how this is now a mean-squared-error loss
-            # inner loop:
-            CV2 = model_selection.KFold(K2, shuffle=True)
-            errors_test = []
-            errors_train = []
-            for (k, (train_index, test_index)) in enumerate(CV2.split(X,y)): 
-                # Extract training and test set for current CV fold, convert to tensors
-                X_train = torch.Tensor(X[train_index,:])
-                y_train = torch.Tensor(y[train_index])
-                X_test = torch.Tensor(X[test_index,:])
-                y_test = torch.Tensor(y[test_index])
+    
 
-                # Train the net on training data
-                net, final_loss, learning_curve = train_neural_net(model,
-                                                                loss_fn,
-                                                                X=X_train,
-                                                                y=y_train,
-                                                                n_replicates=n_replicates,
-                                                                max_iter=max_iter)
-                
-                # Determine estimated class labels for test set
-                y_test_est = net(X_test)
-                y_train_est = net(X_train)
-                
-                # Determine errors and errors
-                se_test = (y_test_est.float()-y_test.float())**2 # squared error
-                mse_test = (sum(se_test).type(torch.float)/len(y_test)).data.numpy() #mean
-                errors_test.append(mse_test) # store error rate for current CV fold 
+            # Train the net on training data
+            net, final_loss, learning_curve = train_neural_net(model,
+                                                            loss_fn,
+                                                            X=X_train,
+                                                            y=y_train,
+                                                            n_replicates=n_replicates,
+                                                            max_iter=max_iter)
             
-                se_train = (y_train_est.float()-y_train.float())**2 # squared error
-                mse_test = (sum(se_train).type(torch.float)/len(y_train)).data.numpy() #mean
-                errors_test.append(mse_test) # store error rate for current CV fold 
+            # Determine estimated class labels for test set
+            y_test_est = net(X_test)
+            y_train_est = net(X_train)
             
-            Error_train_ann[k] = np.mean(errors_train)
-            Error_test_ann[k] = np.mean(errors_test)   
+            # Determine errors and errors
+            se_test = (y_test_est.float()-y_test.float())**2 # squared error
+            mse_test = (sum(se_test).type(torch.float)/len(y_test)).data.numpy() #mean
+            errors_test[k2, n] = mse_test # store error rate for current CV fold 
+        
+            se_train = (y_train_est.float()-y_train.float())**2 # squared error
+            mse_train = (sum(se_train).type(torch.float)/len(y_train)).data.numpy() #mean
+            errors_train[k2, n] = mse_train # store error rate for current CV fold 
+            
+        opt_val_err = np.min(np.mean(errors_test,axis=0))
+        opt_n_hidden_units[k] = n_hidden_units_values[np.argmin(np.mean(errors_test,axis=0))]
+        
+        Error_train_ann[k] = opt_val_err
+        #Error_test_ann[k] = np.mean(errors_test)   
     ###############################
     
     k+=1
