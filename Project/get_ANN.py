@@ -62,11 +62,8 @@ def get_ann(X, y, K, n_hidden_units1, n_hidden_units2, n_replicates=1, max_iter 
         mse = (sum(se).type(torch.float)/len(y_test)).data.numpy() #mean squared error
         errors.append(mse) # store error rate for current CV fold
         
-        print("se of this inner fold: ", se)
         se_tot.append(se.detach().numpy().squeeze())
-        print("se appended: ", se)
         
     se_tot = np.concatenate(se_tot)  
-    print("final Se: ", se_tot)
     
-    return np.mean(errors), se_tot
+    return np.mean(errors), net
