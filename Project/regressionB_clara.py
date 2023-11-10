@@ -28,8 +28,8 @@ y_ann = np.expand_dims(y, axis=1)
 
 ## Crossvalidation
 # Create crossvalidation partition for evaluation
-K1 = 5
-K2 = 5
+K1 = 2
+K2 = 2
 CV = model_selection.KFold(K1, shuffle=True)
 
 ## Baseline
@@ -52,6 +52,7 @@ max_iter = 13000
 Error_train_ann = np.empty((K1,1))
 Error_test_ann = np.empty((K1,1))
 opt_n_hidden_units = np.empty((K1,1))
+opt_z_ann = []
 
 k=0
 for train_index, test_index in CV.split(X,y):
@@ -100,74 +101,24 @@ for train_index, test_index in CV.split(X,y):
     y_test_ann = y_ann[test_index] 
     
     errors_test = np.empty(len(n_hidden_units_values))
+    # z_ann  = np.empty((len(y_test_ann),len(n_hidden_units_values)))
+    z_ann  = []
     for n in range(0, len(n_hidden_units_values)):
         n_hidden_units1 = n_hidden_units_values[n]
         n_hidden_units2 = n_hidden_units1
-        errors_test[n] = get_ann(X_train_ann, y_train_ann, K2, n_hidden_units1, n_hidden_units2)
+        ## inner loop:
+        errors_test[n], z_ann[n] = get_ann(X_train_ann, y_train_ann, K2, n_hidden_units1, n_hidden_units2)
     
     opt_val_err = np.min(errors_test)
     opt_n_hidden_units[k] = n_hidden_units_values[np.argmin(errors_test)]
-        
+    opt_z_ann[k] = z_ann[np.argmin(errors_test)]
+    
+    
     Error_train_ann[k] = opt_val_err
     
-    # # inner loop:
-    # CV2 = model_selection.KFold(K2, shuffle=True)
-    # errors_test = np.empty((K2,len(n_hidden_units_values)))
-    # errors_train = np.empty((K2,len(n_hidden_units_values)))
-    # # y_train_ann = y_train_ann.squeeze()
-     
-    # for (k2, (train_index, test_index)) in enumerate(CV2.split(X_train_ann,y_train_ann)):
-    #     # Extract training and test set for current CV fold, convert to tensors
-    #     X_train = torch.Tensor(X_train_ann[train_index,:])
-    #     y_train = torch.Tensor(y_train_ann[train_index])
-    #     X_test = torch.Tensor(X_train_ann[test_index,:])
-    #     y_test = torch.Tensor(y_train_ann[test_index])
-        
-    #     for n in range(0, len(n_hidden_units_values)):
-    #     # for n_hidden_units2 in range(1, n_hidden_units1+1):
-    #         n_hidden_units1 = n_hidden_units_values[n]
-    #         n_hidden_units2 = n_hidden_units1
-    #         model = lambda: torch.nn.Sequential(
-    #             torch.nn.Linear(M, n_hidden_units1),  # M features to n_hidden_units
-    #             torch.nn.ReLU(),  # 1st transfer function
-    #             torch.nn.Linear(n_hidden_units1, n_hidden_units2),  # Add another hidden layer with n_hidden_units units
-    #             torch.nn.ReLU(),  # 2nd transfer function
-    #             torch.nn.Linear(n_hidden_units2, 1),  # n_hidden_units to 1 output neuron
-    #             # no final transfer function, i.e. "linear output"
-    #         )
-    #         loss_fn = torch.nn.MSELoss() # notice how this is now a mean-squared-error loss
-    
-
-    #         # Train the net on training data
-    #         net, final_loss, learning_curve = train_neural_net(model,
-    #                                                         loss_fn,
-    #                                                         X=X_train,
-    #                                                         y=y_train,
-    #                                                         n_replicates=n_replicates,
-    #                                                         max_iter=max_iter)
-            
-    #         # Determine estimated class labels for test set
-    #         y_test_est = net(X_test)
-    #         y_train_est = net(X_train)
-            
-    #         # Determine errors and errors
-    #         se_test = (y_test_est.float()-y_test.float())**2 # squared error
-    #         mse_test = (sum(se_test).type(torch.float)/len(y_test)).data.numpy() #mean
-    #         errors_test[k2, n] = mse_test # store error rate for current CV fold 
-        
-    #         se_train = (y_train_est.float()-y_train.float())**2 # squared error
-    #         mse_train = (sum(se_train).type(torch.float)/len(y_train)).data.numpy() #mean
-    #         errors_train[k2, n] = mse_train # store error rate for current CV fold 
-            
-
-    #         opt_val_err = np.min(np.mean(errors_test,axis=0))
-    #         opt_n_hidden_units[k] = n_hidden_units_values[np.argmin(np.mean(errors_test,axis=0))]
-        
-    #         Error_train_ann[k] = opt_val_err
-    #         Error_test_ann[k] = np.mean(errors_test)   
     ###############################
     
     k+=1
 
-
+opt_z_ann_ = np.concatenate(opt_z_ann)
 print('Ran!')

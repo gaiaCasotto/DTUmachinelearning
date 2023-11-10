@@ -31,6 +31,7 @@ def get_ann(X, y, K, n_hidden_units1, n_hidden_units2, n_replicates=1, max_iter 
     )
     loss_fn = torch.nn.MSELoss() # notice how this is now a mean-squared-error loss
 
+    se_tot = []
     #print('Training model of type:\n\n{}\n'.format(str(model())))
     errors = [] # make a list for storing generalizaition error in each loop
     for (k, (train_index, test_index)) in enumerate(CV.split(X,y)): 
@@ -58,7 +59,11 @@ def get_ann(X, y, K, n_hidden_units1, n_hidden_units2, n_replicates=1, max_iter 
         
         # Determine errors and errors
         se = (y_test_est.float()-y_test.float())**2 # squared error
-        mse = (sum(se).type(torch.float)/len(y_test)).data.numpy() #mean
+        mse = (sum(se).type(torch.float)/len(y_test)).data.numpy() #mean squared error
         errors.append(mse) # store error rate for current CV fold
         
-    return np.mean(errors) 
+        se_tot.append(se.detach().numpy().squeeze())
+        
+    se_tot = np.concatenate(se_tot)  
+    
+    return np.mean(errors), se_tot
