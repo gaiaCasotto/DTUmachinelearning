@@ -37,10 +37,10 @@ if do_pca_preprocessing:
 
 
 # Parameters for neural network classifier
-n_hidden_units = 5     # number of hidden units
-n_hidden_units2 = 3
+n_hidden_units = 6     # number of hidden units
+n_hidden_units2 = 6
 n_replicates = 2       # number of networks trained in each k-fold
-max_iter = 100000
+max_iter = 13000
 
 # K-fold crossvalidation
 K = 2                  # only three folds to speed up this example
@@ -55,8 +55,8 @@ color_list = ['tab:orange', 'tab:green', 'tab:purple', 'tab:brown', 'tab:pink',
 model = lambda: torch.nn.Sequential(
     torch.nn.Linear(M, n_hidden_units),  # M features to n_hidden_units
     torch.nn.ReLU(),  # 1st transfer function
-    torch.nn.Linear(n_hidden_units, n_hidden_units2),  # Add another hidden layer with n_hidden_units units
-    torch.nn.ReLU(),  # 2nd transfer function
+    #torch.nn.Linear(n_hidden_units, n_hidden_units2),  # Add another hidden layer with n_hidden_units units
+    #torch.nn.ReLU(),  # 2nd transfer function
     torch.nn.Linear(n_hidden_units2, 1),  # n_hidden_units to 1 output neuron
     # no final transfer function, i.e. "linear output"
 )
@@ -115,7 +115,7 @@ draw_neural_net(weights, biases, tf, attribute_names=attributeNames)
 
 # Print the average classification error rate
 print('\nEstimated generalization error, RMSE: {0}'.format(round(np.sqrt(np.mean(errors)), 4)))
-
+print('\nEstimated generalization error, MSE: {0}'.format(round(np.mean(errors), 4)))
 # When dealing with regression outputs, a simple way of looking at the quality
 # of predictions visually is by plotting the estimated value as a function of 
 # the true/known value - these values should all be along a straight line "y=x", 

@@ -37,7 +37,7 @@ n_replicates = 1        # number of networks trained in each k-fold
 max_iter = 10000
 
 # K-fold crossvalidation
-K = 3                   # only three folds to speed up this example
+K = 2                   # only three folds to speed up this example
 CV = model_selection.KFold(K, shuffle=True)
 
 # Setup figure for display of learning curves and error rates in fold
@@ -80,6 +80,7 @@ for (k, (train_index, test_index)) in enumerate(CV.split(X,y)):
     
     # Determine errors and errors
     se = (y_test_est.float()-y_test.float())**2 # squared error
+    se_2 = se.detach().numpy().squeeze()
     mse = (sum(se).type(torch.float)/len(y_test)).data.numpy() #mean
     errors.append(mse) # store error rate for current CV fold 
     

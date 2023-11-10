@@ -20,9 +20,9 @@ def change_y(X, y, attrNames, yName, newYName):
 
 # Load the Heart Disease csv data using the Pandas library
 def get_data_matrix():  #returns X, y, attributeNames
-    filename = '../heart.csv'
+    # filename = '../heart.csv'
     #filename = '/home/codespace/DTUmachinelearning/heart.csv'
-    #filename = 'C:\\Users\\clara\\Desktop\\ML_Exercises\\Project_1\\Data\\heart.csv'
+    filename = 'C:\\Users\\clara\\Desktop\\ML_Exercises\\Project_1\\Data\\heart.csv'
     df = pd.read_csv(filename)
     print(df.describe().T)
     print(round(df['Cholesterol'].corr(df['HeartDisease']),3))

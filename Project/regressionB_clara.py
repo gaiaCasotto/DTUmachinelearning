@@ -1,4 +1,5 @@
 import preprocessing_lib as pplib
+from get_ANN import get_ann
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.io import loadmat
@@ -7,6 +8,7 @@ from sklearn import model_selection
 from toolbox_02450 import train_neural_net, draw_neural_net
 from scipy import stats
 from toolbox_02450 import rlr_validate
+import scipy.stats as st
 
 
 #load data
@@ -32,8 +34,8 @@ K2 = 5
 CV = model_selection.KFold(K1, shuffle=True)
 
 ## Baseline
-Error_baseline = np.empty((K1,1))
-Error_baseline = np.empty((K1,1))
+Error_baseline_train = np.empty((K1,1))
+Error_baseline_test = np.empty((K1,1))
 
 ## RLR
 lambdas = np.logspace(1, 3, 100)
@@ -45,12 +47,17 @@ Error_test_rlr = np.empty((K1,1))
 opt_lambdas = np.empty((K1,1))
 
 ## ANN
-n_hidden_units_values = np.arange(1, 6) 
+n_hidden_units_values = np.arange(3, 7) 
 n_replicates = 1       # number of networks trained in each k-fold
-max_iter = 15000
+max_iter = 13000
 Error_train_ann = np.empty((K1,1))
 Error_test_ann = np.empty((K1,1))
 opt_n_hidden_units = np.empty((K1,1))
+
+## SETUP I
+z_baseline = np.array([])
+z_rlr = np.array([])
+z_ann = np.array([])
 
 k=0
 for train_index, test_index in CV.split(X,y):
@@ -77,9 +84,11 @@ for train_index, test_index in CV.split(X,y):
     XtX = X_train_rlr.T @ X_train_rlr
     
     # Compute mean squared error without using the input data at all
-    Error_baseline[k] = np.square(y_train_rlr-y_train_rlr.mean()).sum(axis=0)/y_train_rlr.shape[0]
-    Error_baseline[k] = np.square(y_test_rlr-y_test_rlr.mean()).sum(axis=0)/y_test_rlr.shape[0]
+    Error_baseline_train[k] = np.square(y_train_rlr-y_train_rlr.mean()).sum(axis=0)/y_train_rlr.shape[0]
+    Error_baseline_test[k] = np.square(y_test_rlr-y_test_rlr.mean()).sum(axis=0)/y_test_rlr.shape[0]
 
+    z_baseline = np.concatenate([z_baseline, np.square(y_test_rlr-y_test_rlr.mean())])
+    
     # Estimate weights for the optimal value of lambda, on entire training set
     lambdaI = opt_lambda * np.eye(M_rlr)
     lambdaI[0,0] = 0 # Do no regularize the bias term
@@ -87,6 +96,8 @@ for train_index, test_index in CV.split(X,y):
     # Compute mean squared error with regularization with optimal lambda
     Error_train_rlr[k] = np.square(y_train_rlr-X_train_rlr @ w_rlr[:,k]).sum(axis=0)/y_train_rlr.shape[0]
     Error_test_rlr[k] = np.square(y_test_rlr-X_test_rlr @ w_rlr[:,k]).sum(axis=0)/y_test_rlr.shape[0]
+    
+    z_rlr = np.concatenate([z_rlr, np.square(y_test_rlr-X_test_rlr @ w_rlr[:,k])])
     
     opt_lambdas[k] = opt_lambda
     
@@ -98,63 +109,82 @@ for train_index, test_index in CV.split(X,y):
     X_test_ann = X_ann[test_index]
     y_test_ann = y_ann[test_index] 
     
-    # inner loop:
-    CV2 = model_selection.KFold(K2, shuffle=True)
-    errors_test = np.empty((K2,len(n_hidden_units_values)))
-    errors_train = np.empty((K2,len(n_hidden_units_values)))
-    # y_train_ann = y_train_ann.squeeze()
-     
-    for (k2, (train_index, test_index)) in enumerate(CV2.split(X,y)):
-        # Extract training and test set for current CV fold, convert to tensors
-        X_train = torch.Tensor(X[train_index,:])
-        y_train = torch.Tensor(y[train_index])
-        X_test = torch.Tensor(X[test_index,:])
-        y_test = torch.Tensor(y[test_index])
-        
-        for n in range(0, len(n_hidden_units_values)):
-        # for n_hidden_units2 in range(1, n_hidden_units1+1):
-            n_hidden_units1 = n_hidden_units_values[n]
-            n_hidden_units2 = n_hidden_units1
-            model = lambda: torch.nn.Sequential(
-                torch.nn.Linear(M, n_hidden_units1),  # M features to n_hidden_units
-                torch.nn.ReLU(),  # 1st transfer function
-                torch.nn.Linear(n_hidden_units1, n_hidden_units2),  # Add another hidden layer with n_hidden_units units
-                torch.nn.ReLU(),  # 2nd transfer function
-                torch.nn.Linear(n_hidden_units2, 1),  # n_hidden_units to 1 output neuron
-                # no final transfer function, i.e. "linear output"
-            )
-            loss_fn = torch.nn.MSELoss() # notice how this is now a mean-squared-error loss
+    errors_test = np.empty(len(n_hidden_units_values))
+    all_nets = []
+    all_z_ann  = np.zeros((len(test_index), len(n_hidden_units_values)))
+    for n in range(0, len(n_hidden_units_values)):
+        n_hidden_units1 = n_hidden_units_values[n]
+        n_hidden_units2 = n_hidden_units1
+        ## inner loop:
+        #errors_test[n], all_z_ann[:, n] = get_ann(X_train_ann, y_train_ann, K2, n_hidden_units1, n_hidden_units2)
+        errors_test[n], net = get_ann(X_train_ann, y_train_ann, K2, n_hidden_units1, n_hidden_units2)
+        all_nets.append(net)
     
+    opt_index = np.argmin(errors_test)
+    opt_net = all_nets[opt_index]
+    
+    X_train_ann_tensor = torch.Tensor(X_train_ann)
+    y_train_ann_tensor = torch.Tensor(y_train_ann)
+    X_test_ann_tensor = torch.Tensor(X_test_ann)
+    y_test_ann_tensor = torch.Tensor(y_test_ann)
+    
+    y_test_ann_est = opt_net(X_test_ann_tensor)
+    y_train_ann_est = opt_net(X_train_ann_tensor)
+    #opt_val_err = np.min(errors_test)
+    opt_n_hidden_units[k] = n_hidden_units_values[opt_index]
 
-            # Train the net on training data
-            net, final_loss, learning_curve = train_neural_net(model,
-                                                            loss_fn,
-                                                            X=X_train,
-                                                            y=y_train,
-                                                            n_replicates=n_replicates,
-                                                            max_iter=max_iter)
-            
-            # Determine estimated class labels for test set
-            y_test_est = net(X_test)
-            y_train_est = net(X_train)
-            
-            # Determine errors and errors
-            se_test = (y_test_est.float()-y_test.float())**2 # squared error
-            mse_test = (sum(se_test).type(torch.float)/len(y_test)).data.numpy() #mean
-            errors_test[k2, n] = mse_test # store error rate for current CV fold 
-        
-            se_train = (y_train_est.float()-y_train.float())**2 # squared error
-            mse_train = (sum(se_train).type(torch.float)/len(y_train)).data.numpy() #mean
-            errors_train[k2, n] = mse_train # store error rate for current CV fold 
-            
-        opt_val_err = np.min(np.mean(errors_test,axis=0))
-        opt_n_hidden_units[k] = n_hidden_units_values[np.argmin(np.mean(errors_test,axis=0))]
-        
-        Error_train_ann[k] = opt_val_err
-        #Error_test_ann[k] = np.mean(errors_test)   
+    # Determine errors and errors
+    se_test = (y_test_ann_est.float()-y_test_ann_tensor.float())**2 # squared error
+    mse_test = (sum(se_test).type(torch.float)/len(y_test_ann_tensor)).data.numpy() #mean squared error
+    # errors.append(mse) # store error rate for current CV fold
+    Error_test_ann[k] = mse_test
+    
+    z_ann = np.concatenate([z_ann, se_test.detach().numpy().squeeze()])
+    
+    se_train = (y_train_ann_est.float()-y_train_ann_tensor.float())**2 # squared error
+    mse_train = (sum(se_train).type(torch.float)/len(y_train_ann_tensor)).data.numpy() #mean squared error
+    # errors.append(mse) # store error rate for current CV fold
+    Error_train_ann[k] = mse_train
+    
+    #z_ann = np.concatenate([z_ann, all_z_ann[:, np.argmin(errors_test)]])
+    
+    
+    
+    
     ###############################
     
     k+=1
+    
+### Confidence intervals and p-value
+alpha = 0.05
+
+z_RLR_vs_BASELINE = -(z_rlr-z_baseline)
+CI_RLR_vs_BASELINE = st.t.interval(1 - alpha, len(z_RLR_vs_BASELINE) - 1, loc=np.mean(z_RLR_vs_BASELINE), scale=st.sem(z_RLR_vs_BASELINE))  # Confidence interval
+p_RLR_vs_BASELINE = 2*st.t.cdf(-np.abs(np.mean(z_RLR_vs_BASELINE)) / st.sem(z_RLR_vs_BASELINE), df=len(z_RLR_vs_BASELINE) - 1)  # p-value
+
+z_ANN_vs_BASELINE = -(z_ann-z_baseline)
+CI_ANN_vs_BASELINE = st.t.interval(1 - alpha, len(z_ANN_vs_BASELINE) - 1, loc=np.mean(z_ANN_vs_BASELINE), scale=st.sem(z_ANN_vs_BASELINE))  # Confidence interval
+p_ANN_vs_BASELINE = 2*st.t.cdf(-np.abs(np.mean(z_ANN_vs_BASELINE)) / st.sem(z_ANN_vs_BASELINE), df=len(z_ANN_vs_BASELINE) - 1)  # p-value
+
+z_RLR_vs_ANN = -(z_rlr-z_ann)
+CI_RLR_vs_ANN = st.t.interval(1 - alpha, len(z_RLR_vs_ANN) - 1, loc=np.mean(z_RLR_vs_ANN), scale=st.sem(z_RLR_vs_ANN))  # Confidence interval
+p_RLR_vs_ANN = 2*st.t.cdf(-np.abs(np.mean(z_RLR_vs_ANN)) / st.sem(z_RLR_vs_ANN), df=len(z_RLR_vs_ANN) - 1)  # p-value
+
+ci_Baseline = st.t.interval(1-alpha, df=len(z_baseline)-1, loc=np.mean(z_baseline), scale=st.sem(z_baseline))  # Confidence interval
+ci_rlr = st.t.interval(1-alpha, df=len(z_rlr)-1, loc=np.mean(z_rlr), scale=st.sem(z_rlr))  # Confidence interval
+ci_ann = st.t.interval(1-alpha, df=len(z_ann)-1, loc=np.mean(z_ann), scale=st.sem(z_ann))  # Confidence interval 
+
+print("Individual confidence intervals: \n", ci_Baseline, 
+      "\n", ci_rlr, "\n", ci_ann)
+
+print("Confidence intervals: \n", CI_ANN_vs_BASELINE, 
+      "\n", CI_RLR_vs_BASELINE, "\n", CI_RLR_vs_ANN)
+
+print("p-values: \n", p_ANN_vs_BASELINE, 
+      "\n", p_RLR_vs_BASELINE, "\n", p_RLR_vs_ANN)
+
+for i in range(0, K1):
+    print(Error_baseline_test[i], Error_test_rlr[i], Error_test_ann[i])
 
 
 print('Ran!')
