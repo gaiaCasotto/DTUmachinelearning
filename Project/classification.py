@@ -1,5 +1,6 @@
 #classification file
-
+from numpy import mean
+from numpy import std
 from sklearn.model_selection import train_test_split, GridSearchCV, KFold
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
@@ -7,7 +8,6 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
 from sklearn.neural_network import MLPClassifier
-#from sklearn.model_selection import GridSearchCV
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import cross_val_score
@@ -21,6 +21,8 @@ import numpy as np
 
 from scipy.io import loadmat
 from toolbox_02450 import rlr_validate
+from toolbox_02450 import mcnemar as tlbx_mcnemar
+
 
 #BASELINE MODEL: The baseline will be a model which compute the largest class on the training data, and predict everything in the test-data as belonging to that class
 
@@ -39,157 +41,254 @@ def baseline_model(X_test_rows, y_train):
     for row in range(X_test_rows):
         y_pred.append(cat)
     return y_pred
-    
-def inner_loop(models, X_train, y_train, CV):
-    best_models = {}
-    best_accuracies = {}
-    for (modelname, model_array) in models.items():
-        best_acc = 0;
-        for model in model_array:
-            print(f'evaluating model : {model}')
-            results = cross_val_score(model, X_train, y_train, cv=CV, scoring='accuracy')
-            for fold, accuracy in enumerate(results, start=1):
-                print(f'Fold {fold} - Accuracy: {accuracy:.2f}')
-                if accuracy > best_acc:
-                    best_acc = accuracy
-                    best_models[modelname] = model
-                    best_accuracies[modelname] = best_acc
-        #Calculate and print the mean and standard deviation of the accuracy
-        mean_accuracy = results.mean()
-        std_accuracy = results.std()
-        print(f'Mean Accuracy: {mean_accuracy:.2f} +/- {std_accuracy:.2f}')
 
-    print(f'best models -> {best_models.items()}')
-    print(f'model accuracies -> {best_accuracies.items()}')
-    return best_models  #and possibly best parameters
 
-def outer_loop(best_models, X, y, CV):
-    best_model = None
-    best_acc = 0;
-    for (modelname, model) in best_models.items():
-        results = cross_val_score(model, X, y, cv=CV, scoring='accuracy')
-        for fold, accuracy in enumerate(results, start=1):
-            print(f'Fold {fold} - Accuracy: {accuracy:.2f}')
-            if accuracy > best_acc:
-                best_acc = accuracy
-                best_model = model
-                
-    print(f'best model is {best_model} with accuracy {best_acc}')
-    return best_model, best_acc
-
- 
- 
+sourceFile = open('results.txt', 'w')
 X, y, attribute_names = pplib.get_data_matrix()
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state = 5)
+# configure the cross-validation procedure
+K = 5
+CV = KFold(n_splits=K, shuffle=True, random_state = 1)# enumerate splits
+outer_results = list()
+nns_pred_vector, nns_acc = [], []
+lrs_pred_vector, lrs_acc = [], []
+bls_pred_vector, bls_acc = [], []
 
-hidden_layer_sizes =  [(50,), (100,), (50, 50), (50, 100), (100, 50), (150), (75)]
+nns_predictions, lrs_predictions, bls_predictions = [], [], []
 
-neuralNetworks = []
-for sizes in hidden_layer_sizes:
-    neuralNetworks.append(MLPClassifier(max_iter = 500, hidden_layer_sizes = sizes))
-lambdas = [0.001, 0.01, 0.1, 1, 10]
-log_regressors = []
-for l in lambdas:
-    log_regressors.append(LogisticRegression( C = 1/l, max_iter = 5000))
-  
-models = {}
-models['neuralNetworks'] = neuralNetworks
-models['LR'] = log_regressors
-#models['baseline'] = baseline
+trained_lrs = []
+big_y_test  = []
 
+k = 0
+for train_ix, test_ix in CV.split(X, y):
+    print(f"OUTER K = {k}")
+    print(f"OUTER K = {k}", file = sourceFile)
+    # split data
+    X_train, X_test = X[train_ix, :], X[test_ix, :]
+    y_train, y_test = y[train_ix], y[test_ix]
+    # configure the cross-validation procedure
+    CV_inner = CV
+    model = None
+    space = dict()
+    
+    print("ANN")
+    model = MLPClassifier(max_iter = 500)
+    space['max_iter'] = [400, 500]
+    space['hidden_layer_sizes'] =  [(50), (100), (50, 50), (50, 100), (100, 50), (150), (75)] #search space
+    search = GridSearchCV(model, space, scoring='accuracy', cv=CV_inner, refit=True)
+    result = search.fit(X_train, y_train)
+    #nns.append(result)
+            # get the best performing model fit on the whole training set
+    best_model = result.best_estimator_
+            # evaluate model on the hold out dataset
+    yhat_nn = best_model.predict(X_test)
+    for i in range(len(y_test)):
+        nns_predictions.append(yhat_nn[i])
+        if yhat_nn[i] == y_test[i]:
+            nns_pred_vector.append(1) #correct prediction
+        else:
+            nns_pred_vector.append(0)  #wrong prediction
+    sum = 0
+    for p in nns_pred_vector:
+        if p == 0:
+            sum += 1
+    E = sum / len(y_test)
+    # evaluate the model
+    acc = accuracy_score(y_test, yhat_nn)
+    nns_acc.append(acc)
+            # store the result
+    outer_results.append(acc)
+    print('>acc=%.3f, est=%.3f, cfg=%s' % (acc, result.best_score_, result.best_params_), file = sourceFile)
+    print('NN error rate: %.3f' % (E), file = sourceFile)
+    print("LR")
+    space = dict()
+    model = LogisticRegression(max_iter = 5000)
+    space['C'] = [1000, 100, 10, 1, 0.1, 0.01, 0.001]
+    search = GridSearchCV(model, space, scoring='accuracy', cv=CV_inner, refit=True)
+    result = search.fit(X_train, y_train)
+    # get the best performing model fit on the whole training set
+    best_model = result.best_estimator_
+    trained_lrs.append(best_model)  #saving them for the last part of classification
+    # evaluate model on the hold out dataset
+    yhat_lr = best_model.predict(X_test)
+    for i in range(len(y_test)):
+        lrs_predictions.append(yhat_lr[i])
+        if yhat_lr[i] == y_test[i]:
+            lrs_pred_vector.append(1) #correct prediction
+        else:
+            lrs_pred_vector.append(0) #wrong prediction
+    # evaluate the model
+    acc = accuracy_score(y_test, yhat_lr)
+    sum = 0
+    for p in lrs_pred_vector:
+        if p == 0:
+            sum += 1
+    E = sum / len(y_test)
+    lrs_acc.append(acc)
+    # store the result
+    outer_results.append(acc)
+    print('>acc=%.3f, est=%.3f, cfg=%s' % (acc, result.best_score_, result.best_params_), file = sourceFile)
+    print('LR error rate: %.3f' % (E), file = sourceFile)
+    
+    
+    baseline_y_pred = baseline_model(X_test.shape[0], y_train)
+    
+    print("Baseline")
+    for i in range(len(y_test)):
+        bls_predictions.append(baseline_y_pred[i])
+        if baseline_y_pred[i] == y_test[i]:
+            bls_pred_vector.append(1) #correct prediction
+        else:
+            bls_pred_vector.append(0)  #wrong prediction
+    #bls_predictions.append(bls_pred_vector)
+    acc = accuracy_score(y_test, baseline_y_pred)
+    sum = 0
+    for p in bls_pred_vector:
+        if p == 0:
+            sum += 1
+    E = sum / len(y_test)
+    bls_acc.append(acc)
+    print('>acc=%.3f, est= baseline ' % (acc), file = sourceFile)
+    print('BL error rate: %.3f' % (E), file = sourceFile)
 
-K = 10
-CV = KFold(n_splits=K, shuffle=True, random_state= 42)
+    outer_results.append(acc)
+    for t in y_test:
+        big_y_test.append(t)
+    k += 1
 
-best_models          = inner_loop(models, X_train, y_train, CV)
-best_model, best_acc = outer_loop(best_models, X, y, CV)
+#print(nns_acc)
 
-baseline_y_pred = baseline_model(X_test.shape[0], y_train)
-print("Baseline Accuracy:", accuracy_score(y_test, baseline_y_pred))
+[thetahat, CI, p] = tlbx_mcnemar(y_test, yhat_nn, yhat_lr, alpha = 0.05)
+print(f'nn vs lr : {[thetahat, CI, p]} ', file = sourceFile)
+[thetahat, CI, p] = tlbx_mcnemar(y_test, yhat_nn, baseline_y_pred, alpha = 0.05)
+print(f'nn vs bl : {[thetahat, CI, p]} ', file = sourceFile)
+[thetahat, CI, p] = tlbx_mcnemar(y_test, yhat_lr, baseline_y_pred, alpha = 0.05)
+print(f'lr vs bl  : {[thetahat, CI, p]} ', file = sourceFile)
+    
+print('Mean accuracy of nn: %.3f (%.3f)' % (mean(nns_acc), std(nns_acc)), file = sourceFile)
+print('Mean accuracy of lr: %.3f (%.3f)' % (mean(lrs_acc), std(lrs_acc)), file = sourceFile)
+print('Mean accuracy of bl: %.3f (%.3f)' % (mean(bls_acc), std(bls_acc)), file = sourceFile)
 
 '''
-#METHOD 2: ANN
-#we can change the layer size
-#or alpha value
-#or the solver for weight optimization
-clf = MLPClassifier(hidden_layer_sizes = (50))
-#clf = MLPClassifier(solver='adam', alpha=1e-5,                               hidden_layer_sizes=(5, 2), random_state=1)
-clf = clf.fit(X_train, y_train)
-y_pred = clf.predict(X_test)
-print("NN Accuracy:", accuracy_score(y_test, y_pred))
+#mcNamaras testing
+from scipy.stats import chi2_contingency, chi2
+from statsmodels.stats.contingency_tables import mcnemar
 
-#LOGISTIC REGRESSION:
 
-lambda_values = [0.001, 0.01, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
-for a_lambda in range(1, 10):
-    lambda_values.append(a_lambda)
-# Create a parameter grid for GridSearchCV
-param_grid = {'C': [1 / a_lambda for a_lambda in lambda_values]}
-# Initialize Logistic Regression
-clf = LogisticRegression(max_iter=5000)
-# Perform grid search with cross-validation
-grid_search = GridSearchCV(clf, param_grid, cv=5)  # 5-fold cross-validation
-grid_search.fit(X_train, y_train)
-# Get the best lambda value from the grid search
-best_lambda = 1 / grid_search.best_params_['C']
+def confidence_interval(chi2_stat):
+    alpha = 0.05
+    df = 2 # Degrees of freedom for the chi-square distribution == number of categories in the contingency tables
 
-# Train Logistic Regression with the best lambda
-best_clf = LogisticRegression(C=grid_search.best_params_['C'], max_iter=5000)
-best_clf = best_clf.fit(X_train, y_train)
+    
 
-y_pred = best_clf.predict(X_test)
-print(f"Best Lambda: {best_lambda}")
-print(f"LR Accuracy with Best Lambda:", accuracy_score(y_test, y_pred))
+    print(f"Confidence Interval: ({lower_bound}, {upper_bound})")
+
+
+def mcNemarTest(arr_nn, arr_lr, arr_bl):
+# Create contingency tables
+    c11, c12, c21, c22 = 0, 0, 0, 0
+    for i in range(len(arr_nn)):
+        if arr_nn[i] == 1:
+            if arr_lr[i] == 1:
+                c11 += 1
+            else:
+                c12 +=1
+        else:
+            if arr_lr[i] == 1:
+                c21 +=1
+            else:
+                c22 += 1
+    contingency_nn_lr = [
+                    [c11,c12],
+                    [c21,c22]
+                    ]
+    c11, c12, c21, c22 = 0, 0, 0, 0
+    i = 0
+    for i in range(len(arr_nn)):
+        if arr_nn[i] == 1:
+            if arr_bl[i] == 1:
+                c11 += 1
+            else:
+                c12 +=1
+        else:
+            if arr_bl[i] == 1:
+                c21 +=1
+            else:
+                c22 += 1
+    contingency_nn_baseline = [
+                        [c11,c12],
+                        [c21,c22]
+                        ]
+    c11, c12, c21, c22 = 0, 0, 0, 0
+    i = 0
+    for i in range(len(arr_lr)):
+        if arr_lr[i] == 1:  #if lr is correct
+            if arr_bl[i] == 1: #and bl is correct
+                c11 += 1
+            else:    #if bl is wrong but lr is correct
+                c12 +=1
+        else:   #if lr is incorrect
+            if arr_bl[i] == 1: #if bl is correct
+                c21 +=1
+            else:    #if bl is incorrect
+                c22 += 1
+    contingency_lr_baseline = [
+                        [c11,c12],
+                        [c21,c22]
+                        ]
+
+    # Perform McNemar's test for each pair
+    #chi2_stat_nn_lr, p_value_nn_lr, _, _       = chi2_contingency(contingency_nn_lr)
+    #chi2_stat_nn_bl, p_value_nn_baseline, _, _ = chi2_contingency(contingency_nn_baseline)
+    #chi2_stat_lr_bl, p_value_lr_baseline, _, _ = chi2_contingency(contingency_lr_baseline)
+    
+    
+    nn_lr    = mcnemar(contingency_nn_lr, exact = False)
+    p_value_nn_lr, stat_nn_lr = nn_lr.pvalue, nn_lr.statistic
+    nn_bl    = mcnemar(contingency_nn_baseline, exact = False)
+    p_value_nn_bl, stat_nn_bl = nn_bl.pvalue, nn_bl.statistic
+    lr_bl    = mcnemar(contingency_lr_baseline, exact = False)
+    p_value_lr_bl, stat_lr_bl = lr_bl.pvalue, lr_bl.statistic
+    
+    print(f"stats: {stat_nn_lr} {stat_lr_bl} {stat_nn_bl}")
+        
+    print(f"mcnemar for nn vs lr: {mcnemar(contingency_nn_lr, exact = False)}")
+    print(f"mcnemar for nn vs bl: {mcnemar(contingency_nn_baseline, exact = False)}")
+    print(f"mcnemar for lr vs bl: {mcnemar(contingency_lr_baseline, exact = False)}")
+
+    confidence_interval(stat_nn_lr)
+    confidence_interval(stat_nn_bl)
+    confidence_interval(stat_lr_bl)
+
+
+
+for fold in range(K):
+    print(f"fold : {fold}")
+    mcNemarTest(nns_predictions[fold], lrs_predictions[fold], bls_predictions[fold])
+    #in mcNemar's test, model A is better than model B if n12 > n21
 '''
-'''
-def cv_report(models, X, y):
-    results = []
-    for name in models.keys():
-        model = models[name]
-        scores = cross_val_score(model, X, y, cv=5, scoring='accuracy')
-        print("Accuracy: %.3f (+/- %.3f) [%s]" %(scores.mean(), scores.std(), name))
+'''P-value for NN vs. LR (p_value_nn_lr):
+
+If p_value_nn_lr < alpha: You would conclude that there is a significant difference between the Neural Network and Logistic Regression models.
+If p_value_nn_lr ≥ alpha: You would not conclude a significant difference between the Neural Network and Logistic Regression models.
 
 
-#print(X_test.shape)
-#print(X_train.shape)
+P-value for NN vs. Baseline (p_value_nn_baseline):
+If p_value_nn_baseline < alpha: You would conclude that there is a significant difference between the Neural Network and Baseline models.
+If p_value_nn_baseline ≥ alpha: You would not conclude a significant difference between the Neural Network and Baseline models.
+
+P-value for LR vs. Baseline (p_value_lr_baseline):
+If p_value_lr_baseline < alpha: You would conclude that there is a significant difference between the Logistic Regression and Baseline models.
+If p_value_lr_baseline ≥ alpha: You would not conclude a significant difference between the Logistic Regression and Baseline models.
+
+Remember that the choice of the significance level (alpha) is somewhat arbitrary and should be determined based on the context of your study and the level of confidence you require. Commonly used values for alpha are 0.05 and 0.01.
+
+ '''
 
 
 
-models = {
-    'CART': DecisionTreeClassifier(), #this could be method 2
-    'SVC' : SVC(probability=True),
-    'GNB' : GaussianNB(),
-    'LDA' : LinearDiscriminantAnalysis(),
-    'KNN' : KNeighborsClassifier()   #this could be method 2
-    #also NN could be method 2
-}
 
+print("Part 4 of classification part")
 
-cv_report(models, X_train, y_train)
-'''
-
-'''
-#method 2 option 1 :  Dec Tree
-clf = DecisionTreeClassifier()  #we can add these to improve accuracy criterion="entropy", max_depth=3
-# Train DecTree
-clf = clf.fit(X_train,y_train)
-#Predict on test dataset
-y_pred = clf.predict(X_test)
-print("DecTree Accuracy:", accuracy_score(y_test, y_pred)) #Accuracy: 0.7554347826086957
-'''
-'''
-#will not use knn
-#method 2 option 2 : Knn
-for k in range(1, 11):
-    clf = KNeighborsClassifier(k)  #iterate with different Ks to improve accuracy
-    clf = clf.fit(X_train, y_train) #train
-    y_pred = clf.predict(X_test) #test
-    print("knn Accuracy:", accuracy_score(y_test, y_pred), "K:", k)
-'''
-'''
-#method 2 option 4: NB
-clf = GaussianNB()
-clf = clf.fit(X_train, y_train)
-y_pred = clf.predict(X_test)
-print("NB Accuracy:", accuracy_score(y_test, y_pred))
-'''
+for lr in trained_lrs:
+    coefficients = lr.coef_
+    print(f'LR coeff : -> {coefficients}')
