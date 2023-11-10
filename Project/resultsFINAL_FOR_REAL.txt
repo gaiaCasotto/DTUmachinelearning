@@ -1,0 +1,43 @@
+OUTER K = 0
+>acc=0.870, est=0.825, cfg={'hidden_layer_sizes': 150, 'max_iter': 500}
+NN error rate: 0.130
+>acc=0.875, est=0.840, cfg={'C': 100}
+LR error rate: 0.125
+>acc=0.543, est= baseline 
+BL error rate: 0.457
+OUTER K = 1
+>acc=0.810, est=0.834, cfg={'hidden_layer_sizes': 100, 'max_iter': 500}
+NN error rate: 0.321
+>acc=0.853, est=0.843, cfg={'C': 1}
+LR error rate: 0.272
+>acc=0.609, est= baseline 
+BL error rate: 0.848
+OUTER K = 2
+>acc=0.792, est=0.853, cfg={'hidden_layer_sizes': 100, 'max_iter': 500}
+NN error rate: 0.530
+>acc=0.847, est=0.847, cfg={'C': 100}
+LR error rate: 0.426
+>acc=0.525, est= baseline 
+BL error rate: 1.328
+OUTER K = 3
+>acc=0.842, est=0.841, cfg={'hidden_layer_sizes': 75, 'max_iter': 400}
+NN error rate: 0.689
+>acc=0.863, est=0.842, cfg={'C': 1}
+LR error rate: 0.563
+>acc=0.541, est= baseline 
+BL error rate: 1.787
+OUTER K = 4
+>acc=0.770, est=0.858, cfg={'hidden_layer_sizes': 100, 'max_iter': 500}
+NN error rate: 0.918
+>acc=0.825, est=0.862, cfg={'C': 1}
+LR error rate: 0.738
+>acc=0.546, est= baseline 
+BL error rate: 2.240
+
+
+nn vs lr : [-0.0546448087431694, (-0.1040443458412772, -0.005112882733468771), 0.052478790283203125] 
+nn vs bl : [0.22404371584699453, (0.12640080442030488, 0.319509434837161), 2.0283289208145556e-05] 
+lr vs bl  : [0.2786885245901639, (0.19726768056635757, 0.35817512294605613), 4.6446053760977124e-10] 
+Mean accuracy of nn: 0.817 (0.035)
+Mean accuracy of lr: 0.853 (0.017)
+Mean accuracy of bl: 0.553 (0.029)
